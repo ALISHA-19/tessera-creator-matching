@@ -1,0 +1,1433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tessera Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: prototype chrome strip on top, product app below with left nav (desktop) / bottom tab bar (phone). Drawers slide from right. */
+:root{
+  --bg:#F2F5F1; --surface:#FFFFFF; --surface-2:#E8EFE9; --line:#DAE4DC; --line-strong:#B5C7BA;
+  --ink:#12201A; --ink-2:#3D4E46; --ink-3:#64766D;
+  --accent:#1F7A5C; --accent-ink:#FFFFFF; --accent-soft:#DCF0E6; --accent-strong:#135A42;
+  --good:#1F7A5C; --good-soft:#DCF0E6;
+  --gold:#A8730F; --gold-soft:#F7EBCD;
+  --bad:#C2412D; --bad-soft:#FBE6E1;
+  --chrome:#0F2A21; --chrome-ink:#EEF6F1; --chrome-2:#1E4436;
+  --scrim:rgba(15,42,33,.45);
+  --av1:#F7EBCD; --av1f:#8A5A08; --av2:#DCF0E6; --av2f:#1F7A5C; --av3:#E8EFE9; --av3f:#34463E; --av4:#E1ECF4; --av4f:#2B6CB0; --av5:#F6E4DF; --av5f:#8A3B2A;
+  --tomato:#E3A93B; --butter:#F2F5F1; --mint:#1F7A5C; --violet:#3D4E46;
+  --shadow:0 1px 2px rgba(15,42,33,.05),0 10px 28px rgba(15,42,33,.07);
+  --shadow-lg:0 22px 60px rgba(15,42,33,.26);
+  --f-display:"Fraunces",Georgia,serif;
+  --f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r-sm:8px; --r:12px; --r-lg:16px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C1613; --surface:#13221C; --surface-2:#0F1D18; --line:#21372E; --line-strong:#35574A;
+  --ink:#EDF5F0; --ink-2:#B3C6BC; --ink-3:#84998E;
+  --accent:#4FC79A; --accent-ink:#0C1613; --accent-soft:#163A2D; --accent-strong:#86E3BF;
+  --good:#6FD3A8; --good-soft:#163A2D; --gold:#F2C46B; --gold-soft:#2E2817; --bad:#F28B82; --bad-soft:#3A2325;
+  --chrome:#08110E; --chrome-ink:#EDF5F0; --chrome-2:#21372E; --scrim:rgba(0,0,0,.62);
+  --av1:#2E2817; --av1f:#F2C46B; --av2:#163A2D; --av2f:#6FD3A8; --av3:#1B2C25; --av3f:#D6E3DC; --av4:#16283A; --av4f:#8EC5E8; --av5:#36232A; --av5f:#F28B82;
+  --tomato:#E3A93B; --butter:#EDF5F0; --mint:#6FD3A8; --violet:#84998E;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.32); color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0C1613; --surface:#13221C; --surface-2:#0F1D18; --line:#21372E; --line-strong:#35574A;
+  --ink:#EDF5F0; --ink-2:#B3C6BC; --ink-3:#84998E;
+  --accent:#4FC79A; --accent-ink:#0C1613; --accent-soft:#163A2D; --accent-strong:#86E3BF;
+  --good:#6FD3A8; --good-soft:#163A2D; --gold:#F2C46B; --gold-soft:#2E2817; --bad:#F28B82; --bad-soft:#3A2325;
+  --chrome:#08110E; --chrome-ink:#EDF5F0; --chrome-2:#21372E; --scrim:rgba(0,0,0,.62);
+  --av1:#2E2817; --av1f:#F2C46B; --av2:#163A2D; --av2f:#6FD3A8; --av3:#1B2C25; --av3f:#D6E3DC; --av4:#16283A; --av4f:#8EC5E8; --av5:#36232A; --av5f:#F28B82;
+  --tomato:#E3A93B; --butter:#EDF5F0; --mint:#6FD3A8; --violet:#84998E;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.32); color-scheme:dark;}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--f-display);letter-spacing:-.01em;margin:0;text-wrap:balance}
+h1{font-size:26px;font-weight:600;line-height:1.2}
+h2{font-size:18px;font-weight:600}
+h3{font-size:15px;font-weight:600}
+.muted{color:var(--ink-3)} .ink2{color:var(--ink-2)}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+
+/* prototype chrome */
+.proto{position:sticky;top:0;z-index:30;background:var(--chrome);color:var(--chrome-ink);display:flex;align-items:center;gap:12px;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));flex-wrap:wrap}
+.brandmark{display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-weight:700;font-size:16px}
+.tiles{display:grid;grid-template-columns:repeat(2,8px);gap:2px}
+.tiles i{width:8px;height:8px;border-radius:2px;background:var(--tomato)}
+.tiles i:nth-child(2){background:var(--butter)} .tiles i:nth-child(3){background:var(--mint)} .tiles i:nth-child(4){background:var(--violet)}
+.ptag{font-size:11px;padding:2px 8px;border:1px solid var(--chrome-2);border-radius:99px;color:var(--chrome-ink);opacity:.8}
+.seg{display:flex;background:var(--chrome-2);border-radius:8px;padding:3px;gap:2px;margin-left:auto}
+.seg button{border:0;background:transparent;color:var(--chrome-ink);padding:5px 12px;border-radius:6px;font-size:13px;font-weight:500;opacity:.75}
+.seg button.on{background:var(--surface);color:var(--ink);opacity:1}
+.pbtn{border:1px solid var(--chrome-2);background:transparent;color:var(--chrome-ink);padding:5px 10px;border-radius:7px;font-size:13px}
+.pbtn:hover{background:var(--chrome-2)}
+
+/* app shell */
+.app{display:grid;grid-template-columns:232px 1fr;min-height:calc(100% - 48px)}
+.side{border-right:1px solid var(--line);background:var(--surface);padding:18px 12px;display:flex;flex-direction:column;gap:4px;position:sticky;top:48px;height:calc(100vh - 48px)}
+.who{display:flex;align-items:center;gap:10px;padding:6px 8px 16px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.who .n{font-weight:600;line-height:1.2} .who .s{font-size:12px;color:var(--ink-3)}
+.navi{display:flex;align-items:center;gap:10px;border:0;background:transparent;padding:9px 10px;border-radius:8px;color:var(--ink-2);font-weight:500;text-align:left;width:100%}
+.navi:hover{background:var(--surface-2)}
+.navi.on{background:var(--accent-soft);color:var(--accent-strong)}
+.navi svg{width:18px;height:18px;flex:none}
+.navi .cnt{margin-left:auto;font-size:11px;background:var(--surface-2);color:var(--ink-2);padding:1px 7px;border-radius:99px}
+.navi.on .cnt{background:var(--surface)}
+.side .foot{margin-top:auto;font-size:12px;color:var(--ink-3);padding:10px;border-top:1px solid var(--line)}
+main{min-width:0;padding:28px max(16px,env(safe-area-inset-right,0px)) 80px max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.pagehead p{margin:4px 0 0;color:var(--ink-2)}
+.tabbar{display:none}
+
+/* primitives */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg)}
+.pad{padding:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line-strong);background:var(--surface);padding:8px 14px;border-radius:8px;font-weight:500;font-size:13.5px;white-space:nowrap;color:var(--ink)}
+.btn:hover{background:var(--surface-2)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.pri:hover{background:var(--accent-strong);border-color:var(--accent-strong)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink-2)}
+.btn.ghost:hover{background:var(--surface-2)}
+.btn.danger{color:var(--bad);border-color:var(--line-strong)}
+.btn.sm{padding:5px 10px;font-size:12.5px}
+.btn.lg{padding:11px 18px;font-size:14.5px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn svg{width:16px;height:16px}
+.iconbtn{border:1px solid var(--line);background:var(--surface);width:32px;height:32px;border-radius:8px;display:inline-grid;place-items:center;color:var(--ink-2)}
+.iconbtn:hover{background:var(--surface-2)} .iconbtn svg{width:16px;height:16px}
+.iconbtn.on{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:3px 9px;border-radius:99px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.chip.acc{background:var(--accent-soft);color:var(--accent-strong)}
+.chip.gold{background:var(--gold-soft);color:var(--gold)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.chip.good{background:var(--good-soft);color:var(--good)}
+.chip.out{background:transparent;border:1px solid var(--line-strong)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.st-applied{background:var(--surface-2);color:var(--ink-2)}
+.st-shortlisted{background:var(--good-soft);color:var(--good)}
+.st-offer{background:var(--gold-soft);color:var(--gold)}
+.st-selected{background:var(--accent-soft);color:var(--accent-strong)}
+.st-declined,.st-withdrawn{background:var(--bad-soft);color:var(--bad)}
+.av{flex:none;display:grid;place-items:center;border-radius:50%;font-weight:600;font-size:13px;width:36px;height:36px}
+.logo{flex:none;display:grid;place-items:center;border-radius:9px;font-family:var(--f-display);font-weight:700;width:38px;height:38px;font-size:15px}
+.c1{background:var(--av1);color:var(--av1f)} .c2{background:var(--av2);color:var(--av2f)} .c3{background:var(--av3);color:var(--av3f)} .c4{background:var(--av4);color:var(--av4f)} .c5{background:var(--av5);color:var(--av5f)}
+.row{display:flex;align-items:center;gap:10px}
+.between{justify-content:space-between}
+.wrapf{flex-wrap:wrap}
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.split{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;align-items:start}
+.divider{height:1px;background:var(--line)}
+
+/* KPI tiles */
+.kpi{padding:16px 18px}
+.kpi .v{font-family:var(--f-display);font-size:26px;font-weight:600;letter-spacing:-.02em;margin-top:4px}
+.kpi .d{font-size:12px;color:var(--ink-3);margin-top:2px}
+.bar{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.bar.gold>i{background:var(--gold)}
+
+/* score ring */
+.ring{position:relative;display:grid;place-items:center;flex:none}
+.ring svg{position:absolute;inset:0;width:100%;height:100%}
+.ring circle{fill:none;stroke-width:4}
+.ring .bg{stroke:var(--surface-2)}
+.ring .fg{stroke-linecap:round}
+.ring.strong .fg{stroke:var(--accent)} .ring.good .fg{stroke:var(--good)} .ring.stretch .fg{stroke:var(--gold)} .ring.na .fg{stroke:var(--line-strong)}
+.ring span{font-family:var(--f-display);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.band{font-size:11.5px;font-weight:600}
+.band.strong{color:var(--accent)} .band.good{color:var(--good)} .band.stretch{color:var(--gold)}
+
+/* banners */
+.banner{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:var(--r);border:1px solid var(--line);background:var(--surface)}
+.banner.acc{background:var(--accent-soft);border-color:transparent;color:var(--accent-strong)}
+.banner.gold{background:var(--gold-soft);border-color:transparent;color:var(--gold)}
+.banner .t{flex:1;min-width:0}
+.banner b{font-weight:600}
+.banner svg{width:18px;height:18px;flex:none}
+
+/* campaign cards */
+.cgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.ccard{padding:16px;display:flex;flex-direction:column;gap:12px;transition:border-color .15s}
+.ccard:hover{border-color:var(--line-strong)}
+.ccard .title{font-family:var(--f-display);font-weight:600;font-size:16px;line-height:1.3;margin:0;background:none;border:0;padding:0;text-align:left;color:var(--ink)}
+.ccard .title:hover{color:var(--accent)}
+.meta{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2)}
+.meta span{display:inline-flex;align-items:center;gap:5px}
+.meta svg{width:14px;height:14px;color:var(--ink-3)}
+.reason{display:flex;gap:8px;font-size:13px;color:var(--ink-2);background:var(--surface-2);border-radius:8px;padding:8px 10px}
+.reason svg{width:16px;height:16px;flex:none;color:var(--accent);margin-top:1px}
+.reason.warn svg{color:var(--gold)}
+.reason.warn{background:var(--gold-soft);color:var(--gold)}
+.comp{font-weight:600;font-variant-numeric:tabular-nums}
+.urgent{color:var(--bad)!important}
+
+/* filters */
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.search{position:relative;flex:1 1 240px;min-width:0}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-3)}
+.search input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface)}
+.sel{padding:8px 30px 8px 11px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);background-position:calc(100% - 15px) 52%,calc(100% - 10px) 52%;background-size:5px 5px;background-repeat:no-repeat;max-width:100%}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);user-select:none;cursor:pointer}
+.toggle input{accent-color:var(--accent);width:16px;height:16px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{border:0;background:transparent;padding:10px 12px;font-weight:500;color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab.on{color:var(--ink);border-bottom-color:var(--accent)}
+.tab .cnt{font-size:11px;background:var(--surface-2);padding:1px 7px;border-radius:99px;margin-left:5px;color:var(--ink-2)}
+.resultline{font-size:13px;color:var(--ink-3)}
+
+/* empty + skeleton */
+.empty{padding:44px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--ink-2)}
+.empty .ic{width:44px;height:44px;border-radius:12px;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-3)}
+.empty .ic svg{width:22px;height:22px}
+.empty h3{color:var(--ink)}
+.empty p{margin:0;max-width:420px}
+.skel{background:linear-gradient(90deg,var(--surface-2) 0%,var(--line) 50%,var(--surface-2) 100%);background-size:200% 100%;animation:sh 1.2s infinite linear;border-radius:6px}
+@keyframes sh{to{background-position:-200% 0}}
+@media (prefers-reduced-motion: reduce){.skel{animation:none}.drawer,.modal{transition:none!important}}
+
+/* lists / tables */
+.list{display:flex;flex-direction:column}
+.li{display:grid;align-items:center;gap:14px;padding:14px 18px;border-top:1px solid var(--line)}
+.li:first-child{border-top:0}
+.li-app{grid-template-columns:minmax(0,2.2fr) minmax(0,1.6fr) minmax(0,1fr) auto}
+.li-cand{grid-template-columns:minmax(0,2fr) minmax(0,1.2fr) minmax(0,1.3fr) 92px auto}
+.li-camp{grid-template-columns:minmax(0,2.2fr) minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr) auto}
+.thead{display:grid;gap:14px;padding:10px 18px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line)}
+.name-btn{border:0;background:none;padding:0;font-weight:600;color:var(--ink);text-align:left}
+.name-btn:hover{color:var(--accent)}
+.steps{display:flex;gap:4px;align-items:center}
+.steps i{height:4px;flex:1;border-radius:99px;background:var(--surface-2)}
+.steps i.on{background:var(--accent)}
+.steps.bad i.on{background:var(--bad)}
+.stat{display:flex;flex-direction:column}
+.stat b{font-variant-numeric:tabular-nums;font-weight:600}
+.stat small{color:var(--ink-3);font-size:11.5px}
+.small{font-size:12.5px}
+
+/* overlay: drawer + modal */
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:40;opacity:0;pointer-events:none;transition:opacity .18s}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(640px,100%);background:var(--bg);z-index:41;transform:translateX(102%);transition:transform .22s ease;display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
+.drawer.on{transform:none}
+.dhead{padding:16px 22px;padding-top:max(16px,env(safe-area-inset-top,0px));background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.dbody{flex:1;overflow:auto;padding:20px 22px 28px;display:flex;flex-direction:column;gap:16px}
+.dfoot{padding:14px 22px;padding-bottom:max(14px,env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-48%) scale(.98);opacity:0;pointer-events:none;width:min(620px,calc(100% - 24px));max-height:calc(100% - 32px);background:var(--surface);border-radius:var(--r-lg);z-index:42;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);transition:all .18s}
+.modal.wide{width:min(980px,calc(100% - 24px))}
+.modal.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+.mhead{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:12px}
+.mbody{padding:20px 22px;overflow:auto;display:flex;flex-direction:column;gap:16px}
+.mfoot{padding:14px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.sec{display:flex;flex-direction:column;gap:10px}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:8px 14px;font-size:13.5px}
+.kv dt{color:var(--ink-3)} .kv dd{margin:0}
+.breakdown{display:flex;flex-direction:column;gap:12px}
+.bd{display:grid;grid-template-columns:120px 1fr 52px;gap:12px;align-items:center;font-size:13px}
+.bd .note{grid-column:2/4;font-size:12.5px;color:var(--ink-2);margin-top:-6px}
+.bd .pts{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.gate{display:flex;gap:8px;align-items:flex-start;font-size:13px}
+.gate svg{width:16px;height:16px;flex:none;margin-top:2px}
+.gate.ok svg{color:var(--accent)} .gate.no svg{color:var(--bad)}
+.ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;color:var(--ink-2)}
+
+/* forms */
+.field{display:flex;flex-direction:column;gap:6px}
+.field label,.lbl{font-weight:500;font-size:13px}
+.field .hint{font-size:12px;color:var(--ink-3)}
+.field .err{font-size:12px;color:var(--bad)}
+.input,textarea.input{padding:9px 11px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);width:100%}
+textarea.input{min-height:110px;resize:vertical}
+.input.bad{border-color:var(--bad)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.checkchip{position:relative}
+.checkchip input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.checkchip span{display:inline-block;padding:6px 12px;border:1px solid var(--line-strong);border-radius:99px;font-size:13px;color:var(--ink-2)}
+.checkchip input:checked+span{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-strong);font-weight:500}
+.checkchip input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.prefix{position:relative}.prefix span{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--ink-3)}.prefix .input{padding-left:24px}
+.stepper{display:flex;gap:8px;font-size:12.5px;color:var(--ink-3)}
+.stepper b{color:var(--accent)}
+.confirm{display:flex;gap:10px;align-items:flex-start;font-size:13.5px}
+.confirm input{margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex:none}
+.success{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:12px 8px}
+.success .ic{width:56px;height:56px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.success .ic svg{width:28px;height:28px}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.35);border-top-color:var(--accent-ink);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.preview{background:var(--surface-2);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.preview .big{font-family:var(--f-display);font-size:30px;font-weight:600}
+
+.toast{position:fixed;left:50%;bottom:max(24px,calc(env(safe-area-inset-bottom,0px) + 76px));transform:translate(-50%,20px);background:var(--ink);color:var(--surface);padding:11px 16px;border-radius:10px;font-size:13.5px;z-index:60;opacity:0;pointer-events:none;transition:all .2s;max-width:calc(100% - 32px);box-shadow:var(--shadow-lg)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* audience bars */
+.aud{display:grid;grid-template-columns:70px 1fr 40px;gap:10px;align-items:center;font-size:12.5px}
+.aud .bar{height:8px}
+.aud.hl .bar>i{background:var(--accent)}
+.aud:not(.hl) .bar>i{background:var(--line-strong)}
+.plat{display:flex;gap:10px;flex-wrap:wrap}
+.platbox{flex:1 1 150px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface)}
+.platbox .v{font-family:var(--f-display);font-weight:600;font-size:18px}
+.guide ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+
+@media (max-width:1080px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.split{grid-template-columns:1fr}}
+@media (max-width:860px){
+  .app{grid-template-columns:1fr}
+  .side{display:none}
+  main{padding-top:20px;padding-bottom:96px}
+  .tabbar{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-right,0px)) max(6px,env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+  .tabbar button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--ink-3);padding:6px 0}
+  .tabbar button.on{color:var(--accent)}
+  .tabbar svg{width:20px;height:20px}
+  .cgrid{grid-template-columns:1fr}
+  .thead{display:none}
+  .li-app,.li-cand,.li-camp{grid-template-columns:1fr auto;}
+  .li .hide-m{display:none}
+  .fgrid{grid-template-columns:1fr}
+  .proto .ptag{display:none}
+  .seg{margin-left:0;order:3;width:100%}
+  .seg button{flex:1}
+}
+@media (max-width:520px){
+  .g4,.g2{grid-template-columns:1fr 1fr}
+  h1{font-size:22px}
+  .kpi .v{font-size:22px}
+  .bd{grid-template-columns:96px 1fr 44px}
+  .kv{grid-template-columns:1fr}
+  .kv dt{margin-top:6px}
+  .modal{top:auto;bottom:0;left:0;right:0;transform:translateY(20px);width:100%;max-height:92%;border-radius:16px 16px 0 0}
+  .modal.wide{width:100%}
+  .modal.on{transform:none}
+  .mfoot{padding-bottom:max(14px,env(safe-area-inset-bottom,0px))}
+}
+
+/* emerald & gold polish */
+.btn.pri{background:linear-gradient(135deg,var(--accent),var(--accent-strong));border-color:transparent;box-shadow:0 6px 18px -8px var(--accent)}
+.btn.pri:hover{filter:brightness(1.06)}
+.side{background:linear-gradient(180deg,var(--surface),var(--surface-2))}
+.navi.on{background:var(--accent-soft);color:var(--accent-strong);box-shadow:inset 3px 0 0 var(--accent)}
+.kpi{position:relative;overflow:hidden}
+.kpi::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--gold))}
+.card{box-shadow:var(--shadow)}
+</style>
+</head>
+<body>
+<div class="proto" role="banner">
+  <div class="brandmark"><span class="tiles" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Tessera</div>
+  <span class="ptag">Clickable wireframe · sample data</span>
+  <div class="seg" role="tablist" aria-label="Switch side of the marketplace">
+    <button id="role-creator" data-act="role" data-role="creator" role="tab">Creator · Aanya Rao</button>
+    <button id="role-brand" data-act="role" data-role="brand" role="tab">Brand · Kora Botanics</button>
+  </div>
+  <button class="pbtn" data-act="guide">Demo script</button>
+  <button class="pbtn" data-act="reset">Reset demo</button>
+</div>
+<div class="app">
+  <aside class="side" id="side"></aside>
+  <main id="main"></main>
+</div>
+<nav class="tabbar" id="tabbar" aria-label="Primary"></nav>
+<div class="scrim" id="scrim" data-act="close"></div>
+<div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Details"></div>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Dialog"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ============ Fixed demo clock ============ */
+const TODAY = new Date('2026-11-10T00:00:00');
+const COMMISSION = 0.15;
+
+/* ============ Reference data ============ */
+const PLAT = {instagram:'Instagram', youtube:'YouTube'};
+const DELIV = {
+  reel:{label:'Instagram Reel', p:'instagram'}, story:{label:'Instagram Story', p:'instagram'}, post:{label:'Instagram Post', p:'instagram'},
+  video:{label:'YouTube integration', p:'youtube'}, short:{label:'YouTube Short', p:'youtube'}
+};
+const CATS = ['Skincare','Haircare','Wellness','Fitness','Food','Fashion','Lifestyle','Travel','Home','Parenting','Tech','Finance'];
+const RELATED = {
+  Skincare:['Haircare','Wellness','Fashion'], Haircare:['Skincare','Fashion'], Wellness:['Fitness','Food','Skincare','Parenting'],
+  Fitness:['Wellness','Food'], Food:['Wellness','Lifestyle','Travel'], Fashion:['Lifestyle','Skincare','Haircare'],
+  Lifestyle:['Fashion','Travel','Home','Food','Wellness'], Travel:['Lifestyle','Food'], Home:['Lifestyle','Parenting'],
+  Parenting:['Home','Wellness'], Tech:['Finance','Lifestyle'], Finance:['Tech']
+};
+const AGES = ['18-24','25-34','35-44','45+'];
+const AGE_LABEL = {'18-24':'18–24','25-34':'25–34','35-44':'35–44','45+':'45+'};
+const DECLINE_REASONS = ['Audience doesn\'t match our target','Quote is above our budget','Content style isn\'t the right fit','Timeline doesn\'t work for us','All slots are filled'];
+const CITIES = ['Bengaluru','Mumbai','Delhi','Hyderabad','Chennai','Pune','Kolkata','Ahmedabad','Kochi','Goa','Guwahati'];
+
+const BRANDS = {
+  kora:{name:'Kora Botanics', short:'K', c:'c1', cat:'Skincare', respond:2, paidOnTime:97, run:14, about:'Bengaluru skincare brand making fragrance-free formulas for humid Indian weather.'},
+  brew:{name:'Brewnorth Coffee', short:'B', c:'c3', cat:'Food', respond:3, paidOnTime:100, run:9, about:'Single-estate coffee from Chikmagalur, sold online.'},
+  stride:{name:'Strideway', short:'S', c:'c2', cat:'Fitness', respond:4, paidOnTime:94, run:21, about:'Running shoes designed for Indian roads and heat.'},
+  lumen:{name:'Lumen Home', short:'L', c:'c5', cat:'Home', respond:3, paidOnTime:98, run:11, about:'Lighting and decor for rented homes.'},
+  fitfuel:{name:'FitFuel', short:'F', c:'c4', cat:'Wellness', respond:2, paidOnTime:99, run:17, about:'Protein and breakfast mixes.'},
+  halden:{name:'Halden Skin Lab', short:'H', c:'c2', cat:'Skincare', respond:2, paidOnTime:100, run:6, about:'Dermatologist-led sunscreen and barrier-care brand.'},
+  ledgerly:{name:'Ledgerly', short:'Lg', c:'c5', cat:'Finance', respond:5, paidOnTime:92, run:8, about:'Money app for first-time earners.'},
+  masala:{name:'Masala Lab', short:'M', c:'c3', cat:'Food', respond:3, paidOnTime:96, run:12, about:'Ready-to-cook spice kits from regional Indian kitchens.'},
+  velvet:{name:'Velvet & Vine', short:'V', c:'c4', cat:'Haircare', respond:3, paidOnTime:95, run:10, about:'Haircare for curly and frizz-prone hair.'},
+  nimbus:{name:'Nimbus Stays', short:'N', c:'c2', cat:'Travel', respond:2, paidOnTime:98, run:7, about:'Boutique weekend stays around South Indian cities.'},
+  pixel:{name:'Pixelpeak', short:'P', c:'c5', cat:'Tech', respond:4, paidOnTime:93, run:19, about:'Audio and wearables brand.'},
+  oak:{name:'Oaktree Kids', short:'O', c:'c1', cat:'Parenting', respond:3, paidOnTime:97, run:5, about:'Gentle baby and toddler care.'},
+  salt:{name:'Saltwater Swim', short:'Sw', c:'c2', cat:'Fashion', respond:3, paidOnTime:100, run:4, about:'Swim and resort wear, made in Tiruppur.'},
+  dew:{name:'Dewdrop', short:'D', c:'c4', cat:'Skincare', respond:4, paidOnTime:91, run:13, about:'Affordable skincare for oily and acne-prone skin.'}
+};
+
+const BASE_CAMPAIGNS = [
+  {id:'k01', brand:'kora', title:'Monsoon Barrier Serum: real-skin reviews', cat:'Skincare', type:'Paid + product', productValue:1450,
+   deliv:[['reel',1],['story',3]], budget:[28000,38000], minF:20000, city:null, target:{gender:'female', ages:['25-34'], geo:'metro'},
+   slots:6, posted:'2026-11-06', applyBy:'2026-11-18', due:'2026-12-05', status:'open', modeled:true,
+   brief:'We are launching a lightweight barrier serum for humid weather. We want honest, routine-style reviews from creators whose audience deals with oily, sensitive or monsoon-stressed skin. No before/after claims.',
+   dos:['Show the serum inside your actual routine','Mention it is fragrance-free','Use #KoraPartner and the paid partnership label'], donts:['No medical or "cures acne" claims','No filters on skin close-ups']},
+  {id:'k02', brand:'brew', title:'Slow mornings: pour-over at home', cat:'Lifestyle', type:'Paid + product', productValue:1200,
+   deliv:[['reel',1],['story',2]], budget:[22000,32000], minF:15000, city:null, target:{gender:'all', ages:['25-34','35-44'], geo:'metro'},
+   slots:8, posted:'2026-10-28', applyBy:'2026-11-12', due:'2026-11-30', status:'open', applicants:64,
+   brief:'Show a calm weekday morning built around a pour-over. Product, kettle and filter papers shipped to you.', dos:['Natural light','Show the brew ratio'], donts:['No sugar-heavy recipes']},
+  {id:'k03', brand:'stride', title:'10K training diaries', cat:'Fitness', type:'Paid', deliv:[['reel',2],['short',1]], budget:[35000,50000], minF:20000, city:null,
+   target:{gender:'all', ages:['18-24','25-34'], geo:'india'}, slots:10, posted:'2026-11-01', applyBy:'2026-11-15', due:'2026-12-10', status:'open', applicants:112,
+   brief:'Document four weeks of training for a 10K in Strideway Tempo shoes. Beginners welcome.', dos:['Show real runs, not studio shots'], donts:['No competitor shoes in frame']},
+  {id:'k04', brand:'lumen', title:'Festive corner makeover', cat:'Home', type:'Paid + product', productValue:3800, deliv:[['reel',1]], budget:[15000,20000], minF:10000, city:null,
+   target:{gender:'all', ages:['35-44','45+'], geo:'metro'}, slots:5, posted:'2026-10-12', applyBy:'2026-10-22', due:'2026-11-05', status:'closed', applicants:88, brief:'Restyle one corner of a rented home for Diwali.', dos:[], donts:[]},
+  {id:'k05', brand:'fitfuel', title:'Protein that tastes like breakfast', cat:'Wellness', type:'Paid + product', productValue:900, deliv:[['reel',1],['post',1]], budget:[26000,32000], minF:15000, city:null,
+   target:{gender:'all', ages:['18-24','25-34'], geo:'india'}, slots:6, posted:'2026-10-15', applyBy:'2026-10-25', due:'2026-11-20', status:'closed', applicants:71, brief:'Swap one weekday breakfast for FitFuel oats for two weeks.', dos:[], donts:[]},
+  {id:'k06', brand:'halden', title:'Sunscreen myths, busted with a dermatologist', cat:'Skincare', type:'Paid', deliv:[['video',1],['reel',1]], budget:[35000,42000], minF:10000, city:null,
+   target:{gender:'female', ages:['25-34','35-44'], geo:'metro'}, slots:4, posted:'2026-11-08', applyBy:'2026-11-22', due:'2026-12-12', status:'open', applicants:17,
+   brief:'A 60–90 second integration in a YouTube video where you test three sunscreen myths with our in-house dermatologist (remote call provided).', dos:['Keep the dermatologist segment unedited'], donts:['No SPF number claims beyond the label']},
+  {id:'k07', brand:'ledgerly', title:'First salary, first SIP', cat:'Finance', type:'Paid', deliv:[['reel',1]], budget:[15000,22000], minF:10000, city:null,
+   target:{gender:'all', ages:['18-24'], geo:'india'}, slots:12, posted:'2026-11-05', applyBy:'2026-11-20', due:'2026-12-01', status:'open', applicants:46,
+   brief:'Explain how you set up your first monthly SIP using Ledgerly. Simple, no jargon.', dos:['Include the SEBI risk disclaimer on screen'], donts:['No return promises']},
+  {id:'k08', brand:'masala', title:'15-minute weeknight curries', cat:'Food', type:'Paid + product', productValue:650, deliv:[['reel',1],['story',3]], budget:[12000,18000], minF:8000, city:null,
+   target:{gender:'all', ages:['25-34','35-44'], geo:'india'}, slots:15, posted:'2026-11-03', applyBy:'2026-11-17', due:'2026-11-30', status:'open', applicants:93,
+   brief:'Cook one Masala Lab kit on a busy weekday, start to finish in one take.', dos:['Show the timer'], donts:[]},
+  {id:'k09', brand:'velvet', title:'Frizz-free monsoon hair', cat:'Haircare', type:'Paid + product', productValue:1100, deliv:[['reel',1],['story',2]], budget:[30000,40000], minF:50000, city:null,
+   target:{gender:'female', ages:['18-24','25-34'], geo:'metro'}, slots:5, posted:'2026-11-07', applyBy:'2026-11-21', due:'2026-12-08', status:'open', applicants:29,
+   brief:'Show a humid-day hair routine using our leave-in cream.', dos:[], donts:[]},
+  {id:'k10', brand:'nimbus', title:'Weekend escapes from Bengaluru', cat:'Travel', type:'Paid + product', productValue:12000, deliv:[['reel',2]], budget:[30000,40000], minF:15000, city:'Bengaluru',
+   target:{gender:'all', ages:['18-24','25-34'], geo:'india'}, slots:4, posted:'2026-11-04', applyBy:'2026-11-19', due:'2026-12-15', status:'open', applicants:22,
+   brief:'A hosted two-night stay at one of our properties within 4 hours of Bengaluru. Two reels from the trip.', dos:['Tag the property'], donts:[]},
+  {id:'k11', brand:'pixel', title:'Unboxing the Aura buds', cat:'Tech', type:'Paid + product', productValue:4999, deliv:[['video',1]], budget:[60000,90000], minF:100000, city:null,
+   target:{gender:'all', ages:['18-24','25-34'], geo:'india'}, slots:6, posted:'2026-11-02', applyBy:'2026-11-16', due:'2026-11-29', status:'open', applicants:31,
+   brief:'Dedicated review video of the Aura buds.', dos:[], donts:[]},
+  {id:'k12', brand:'oak', title:'Toddler bath-time routine', cat:'Parenting', type:'Paid', deliv:[['reel',1],['story',2]], budget:[20000,28000], minF:10000, city:'Mumbai',
+   target:{gender:'female', ages:['25-34','35-44'], geo:'metro'}, slots:4, posted:'2026-11-06', applyBy:'2026-11-17', due:'2026-12-02', status:'open', applicants:19,
+   brief:'On-site shoot at our Bandra studio on 2 Dec.', dos:[], donts:[]},
+  {id:'k13', brand:'salt', title:'The resort edit', cat:'Fashion', type:'Product only', productValue:9500, deliv:[['reel',2]], budget:[0,0], minF:10000, city:null,
+   target:{gender:'female', ages:['18-24','25-34'], geo:'metro'}, slots:10, posted:'2026-11-09', applyBy:'2026-11-24', due:'2026-12-20', status:'open', applicants:57,
+   brief:'Style two pieces from the resort line. Product only, no fee.', dos:[], donts:[]},
+  {id:'k14', brand:'dew', title:'Night routine for oily skin', cat:'Skincare', type:'Paid', deliv:[['reel',1]], budget:[10000,15000], minF:10000, city:null,
+   target:{gender:'female', ages:['18-24'], geo:'metro'}, slots:12, posted:'2026-11-09', applyBy:'2026-11-23', due:'2026-12-06', status:'open', applicants:24,
+   brief:'Your real night routine with Dewdrop gel cleanser and moisturiser.', dos:[], donts:[]}
+];
+/* Kora's other campaigns (brand overview only) */
+const KORA_OTHERS = [
+  {id:'k15', brand:'kora', title:'Vitamin C Glow Drops: Diwali', cat:'Skincare', status:'production', slots:5, confirmed:5, due:'2026-11-14', spend:165000},
+  {id:'k16', brand:'kora', title:'Ceramide Cleanser relaunch', cat:'Skincare', status:'draft', draft:{title:'Ceramide Cleanser relaunch', cat:'Skincare', preset:'r1', min:15000, max:22000, minF:10000, gender:'all', ages:['18-24','25-34'], geo:'india', slots:8, applyBy:'2026-11-30'}}
+];
+
+/* ============ Creators (demo pool of 16; cr01 is the signed-in creator) ============ */
+function cr(id,name,city,cats,plats,f,ages,metro,cities,rates,done,onTime,extra){
+  const a={}; AGES.forEach((k,i)=>a[k]=ages[i]);
+  return Object.assign({id,name,city,cats,platforms:plats,aud:{female:f,ages:a,metro,cities},rates,done,onTime,verified:{instagram:true,youtube:false}},extra||{});
+}
+const BASE_CREATORS = [
+  cr('cr01','Aanya Rao','Bengaluru',['Skincare','Wellness','Lifestyle'],{instagram:{f:48200,er:4.6},youtube:{f:12400,er:6.1}},.71,[.38,.41,.15,.06],.64,'Bengaluru 22% · Mumbai 14% · Hyderabad 11%',{reel:18000,story:6000,post:12000,video:25000,short:9000},9,8,{handle:'@aanya.skin',bio:'Skincare for humid weather and sensitive skin. Ingredient-first reviews, no filters.',langs:'English, Kannada, Hindi'}),
+  cr('cr02','Meher Kapoor','Mumbai',['Skincare','Fashion'],{instagram:{f:86000,er:3.1}},.78,[.52,.33,.11,.04],.72,'Mumbai 31% · Delhi 12% · Pune 9%',{reel:26000,story:8000,post:15000},14,13,{handle:'@meherglow'}),
+  cr('cr03','Ritika Sen','Kolkata',['Skincare','Wellness'],{instagram:{f:31000,er:5.2}},.82,[.30,.48,.16,.06],.58,'Kolkata 28% · Bengaluru 10% · Delhi 9%',{reel:14000,story:5000,post:9000},4,4,{handle:'@ritika.routine'}),
+  cr('cr04','Dev Malhotra','Delhi',['Skincare','Fitness'],{instagram:{f:54000,er:3.4}},.31,[.44,.40,.12,.04],.69,'Delhi 30% · Gurugram 12% · Mumbai 9%',{reel:20000,story:6000,post:11000},6,5,{handle:'@dev.grooms'}),
+  cr('cr05','Sana Qureshi','Hyderabad',['Skincare','Lifestyle'],{instagram:{f:22600,er:6.8}},.76,[.49,.36,.11,.04],.61,'Hyderabad 34% · Bengaluru 11% · Chennai 7%',{reel:11000,story:4000,post:7000},1,1,{handle:'@sanaskinlog'}),
+  cr('cr06','Priya Iyer','Chennai',['Wellness','Food'],{instagram:{f:67000,er:2.4},youtube:{f:30500,er:3.9}},.66,[.22,.44,.24,.10],.55,'Chennai 33% · Bengaluru 14% · Coimbatore 8%',{reel:22000,story:7000,post:12000,video:30000,short:10000},11,9,{handle:'@priya.eatswell'}),
+  cr('cr07','Tanvi Joshi','Pune',['Skincare','Haircare'],{instagram:{f:41000,er:4.1}},.84,[.29,.55,.12,.04],.63,'Pune 26% · Mumbai 18% · Bengaluru 8%',{reel:16000,story:5500,post:10000},7,7,{handle:'@tanvi.tested'}),
+  cr('cr08','Neha Bhat','Bengaluru',['Lifestyle','Fashion'],{instagram:{f:120000,er:1.9}},.69,[.35,.42,.17,.06],.74,'Bengaluru 25% · Mumbai 15% · Delhi 12%',{reel:38000,story:12000,post:22000},18,15,{handle:'@nehabhat'}),
+  cr('cr09','Ishaan Verma','Mumbai',['Tech','Lifestyle'],{instagram:{f:73000,er:2.8},youtube:{f:142000,er:4.4}},.22,[.46,.38,.12,.04],.70,'Mumbai 20% · Delhi 14% · Bengaluru 13%',{reel:24000,story:7000,post:14000,video:60000,short:15000},12,11,{handle:'@ishaan.tech'}),
+  cr('cr10','Kavya Menon','Kochi',['Skincare','Wellness'],{instagram:{f:18900,er:7.2}},.80,[.41,.42,.12,.05],.38,'Kochi 30% · Thiruvananthapuram 14% · Bengaluru 8%',{reel:9000,story:3500,post:6000},2,2,{handle:'@kavya.kerala.skin'}),
+  cr('cr11','Zoya Shaikh','Mumbai',['Fashion','Skincare'],{instagram:{f:39000,er:3.8}},.74,[.47,.37,.12,.04],.77,'Mumbai 36% · Pune 10% · Delhi 9%',{reel:15000,story:5000,post:9000},5,4,{handle:'@zoyastyles'}),
+  cr('cr12','Ananya Das','Guwahati',['Skincare','Lifestyle'],{instagram:{f:27000,er:5.9}},.79,[.40,.43,.13,.04],.35,'Guwahati 29% · Kolkata 12% · Shillong 9%',{reel:12000,story:4000,post:8000},3,3,{handle:'@ananya.northeast'}),
+  cr('cr13','Rhea Fernandes','Goa',['Travel','Lifestyle'],{instagram:{f:58000,er:3.0},youtube:{f:9800,er:4.0}},.61,[.33,.45,.16,.06],.52,'Goa 18% · Mumbai 17% · Bengaluru 12%',{reel:21000,story:6500,post:12000,video:20000,short:8000},8,8,{handle:'@rhea.roams'}),
+  cr('cr14','Mira Shah','Ahmedabad',['Skincare','Wellness'],{instagram:{f:44000,er:4.9}},.80,[.31,.50,.14,.05],.57,'Ahmedabad 27% · Mumbai 15% · Surat 9%',{reel:15000,story:5000,post:9500},6,6,{handle:'@mira.minimal'}),
+  cr('cr15','Pooja Nair','Bengaluru',['Haircare','Skincare'],{instagram:{f:35000,er:4.4}},.86,[.36,.46,.13,.05],.66,'Bengaluru 30% · Chennai 10% · Kochi 9%',{reel:14000,story:4500,post:9000},3,3,{handle:'@pooja.curls'}),
+  cr('cr16','Arjun Rao','Bengaluru',['Fitness','Food'],{instagram:{f:61000,er:3.6},youtube:{f:24000,er:5.0}},.28,[.40,.44,.12,.04],.60,'Bengaluru 24% · Hyderabad 11% · Pune 9%',{reel:19000,story:6000,post:11000,video:26000,short:9000},10,9,{handle:'@arjun.lifts'})
+];
+
+/* ============ Seed applications ============ */
+const SEED_APPS = [
+  // Aanya's history
+  {id:'a01', cr:'cr01', k:'k02', status:'shortlisted', quote:30000, pitch:'Mornings are the only quiet part of my day, and my audience sees that ritual a lot. I would film a real pour-over with my usual playlist.', applied:'2026-11-02', viewed:true, seed:true},
+  {id:'a02', cr:'cr01', k:'k03', status:'applied', quote:45000, pitch:'I started running in August and my audience has been asking about it. Happy to document the full four weeks honestly, including the bad runs.', applied:'2026-11-07', viewed:true, seed:true},
+  {id:'a03', cr:'cr01', k:'k04', status:'declined', quote:18000, pitch:'I rent a small 1BHK and decorate on a budget.', applied:'2026-10-18', viewed:true, reason:'Audience doesn\'t match our target', note:'The brand chose creators whose audience is mostly 35–44.', seed:true},
+  {id:'a04', cr:'cr01', k:'k05', status:'selected', quote:30000, pitch:'Breakfast is the meal I skip most. Two weeks of FitFuel oats is a real test for me.', applied:'2026-10-20', viewed:true, seed:true},
+  // Applicants on Kora Monsoon Barrier Serum (k01)
+  {id:'b02', cr:'cr02', k:'k01', status:'applied', quote:38000, pitch:'My audience is mostly Mumbai women dealing with humidity breakouts. I would do a 7-day diary reel, quoted below my usual rate because I like the brand.', applied:'2026-11-06', seed:true},
+  {id:'b03', cr:'cr03', k:'k01', status:'shortlisted', quote:28000, pitch:'Kolkata monsoons are brutal on sensitive skin. I review fragrance-free products only, so this fits my page. I can share my last barrier-cream reel stats.', applied:'2026-11-06', viewed:true, seed:true},
+  {id:'b04', cr:'cr04', k:'k01', status:'applied', quote:36000, pitch:'Men\'s skincare is underserved. I would show how guys can use a serum without a 10-step routine.', applied:'2026-11-07', seed:true},
+  {id:'b05', cr:'cr05', k:'k01', status:'applied', quote:23000, pitch:'New to brand collabs but my engagement is strong. I post daily skin check-ins and would make the serum part of them for two weeks.', applied:'2026-11-07', seed:true},
+  {id:'b06', cr:'cr06', k:'k01', status:'applied', quote:38000, pitch:'I can connect skincare with diet and hydration, which my audience responds to.', applied:'2026-11-07', seed:true},
+  {id:'b07', cr:'cr07', k:'k01', status:'shortlisted', quote:32000, pitch:'Pune humidity plus oily T-zone: that is me and 60% of my comments. I will do a no-filter morning and night routine.', applied:'2026-11-08', viewed:true, seed:true},
+  {id:'b08', cr:'cr08', k:'k01', status:'applied', quote:38000, pitch:'Large lifestyle audience in Bengaluru. Would style it as part of a monsoon self-care day.', applied:'2026-11-08', seed:true},
+  {id:'b11', cr:'cr11', k:'k01', status:'applied', quote:30000, pitch:'Fashion-first page but skincare reels do best for me. Can shoot a get-ready-with-me.', applied:'2026-11-08', seed:true},
+  {id:'b12', cr:'cr12', k:'k01', status:'applied', quote:24000, pitch:'Northeast weather is humid nine months a year. My audience rarely sees products tested here.', applied:'2026-11-09', seed:true},
+  {id:'b13', cr:'cr13', k:'k01', status:'applied', quote:34000, pitch:'Beach humidity and sun every day in Goa. I can show the serum on travel days.', applied:'2026-11-09', seed:true}
+];
+
+/* ============ State ============ */
+const KEY = 'tessera-proto-v3';
+function fresh(){ return {role:'creator', saved:{k06:true}, apps:JSON.parse(JSON.stringify(SEED_APPS)), invites:[], custom:[], watch:{}, profile:null, ytVerified:false, drafts:{k16:true}, seq:100}; }
+let S = fresh();
+try{ const raw = localStorage.getItem(KEY); if(raw){ S = Object.assign(fresh(), JSON.parse(raw)); } }catch(e){}
+function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+
+const UI = {dtab:'eligible', q:'', niche:'all', plat:'all', comp:0, ctype:'all', audfit:false, sort:'match', loaded:{},
+  appsf:'all', kid:'k01', ctab:'applicants', band:'all', bsort:'match',
+  fq:'', fniche:'all', fplat:'all', ftier:'all', fer:0, fk:'k01', fcity:'all'};
+
+/* ============ Selectors ============ */
+function creators(){ return BASE_CREATORS.map(c=> c.id==='cr01' ? me() : c); }
+function me(){
+  const b = BASE_CREATORS[0]; const p = S.profile || {};
+  return Object.assign({}, b, {cats:p.cats||b.cats, city:p.city||b.city, rates:Object.assign({}, b.rates, p.rates||{}), productOnly: p.productOnly!==undefined? p.productOnly : true,
+    verified:{instagram:true, youtube:S.ytVerified}});
+}
+function creator(id){ return creators().find(c=>c.id===id); }
+function campaigns(){ return BASE_CAMPAIGNS.concat(S.custom); }
+function campaign(id){ return campaigns().find(k=>k.id===id); }
+function appFor(crId,kId){ return S.apps.find(a=>a.cr===crId && a.k===kId && a.status!=='withdrawn'); }
+function myApps(){ return S.apps.filter(a=>a.cr==='cr01'); }
+function appsOn(kId){ return S.apps.filter(a=>a.k===kId && a.status!=='withdrawn'); }
+function invited(crId,kId){ return S.invites.some(i=>i.cr===crId && i.k===kId); }
+function applicantCount(k){ if(k.modeled) return appsOn(k.id).length; return k.applicants + S.apps.filter(a=>a.k===k.id && !a.seed && a.status!=='withdrawn').length; }
+
+/* ============ Formatting ============ */
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const inr = n => '₹' + Math.round(n).toLocaleString('en-IN');
+const inrK = n => !n ? '₹0' : n>=100000 ? '₹'+(n/100000).toFixed(n%100000?2:0).replace(/\.?0+$/,'')+'L' : '₹'+(n/1000).toFixed(n%1000?1:0).replace(/\.0$/,'')+'K';
+const fol = n => n>=1e6 ? (n/1e6).toFixed(1).replace(/\.0$/,'')+'M' : n>=1000 ? (n/1000).toFixed(1).replace(/\.0$/,'')+'K' : String(n);
+const pct = x => Math.round(x*100)+'%';
+const D = s => new Date(s+'T00:00:00');
+const fmtD = s => D(s).toLocaleDateString('en-IN',{day:'numeric', month:'short'});
+const daysTo = s => Math.round((D(s)-TODAY)/86400000);
+function addDays(s,n){ const d=D(s); d.setDate(d.getDate()+n); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function todayISO(){ return '2026-11-10'; }
+const initials = n => n.split(' ').map(w=>w[0]).slice(0,2).join('');
+const avc = id => 'c'+(1+(parseInt(id.replace(/\D/g,''),10)%5));
+const delivText = k => k.deliv.map(([t,n])=>`${n} × ${DELIV[t].label}`).join(' + ');
+function compText(k){
+  if(k.type==='Product only') return `Product worth ${inr(k.productValue)}`;
+  return `${inrK(k.budget[0])}–${inrK(k.budget[1])}`;
+}
+function packageRate(c,k){ return k.deliv.reduce((s,[t,n])=> s + (c.rates[t]||0)*n, 0); }
+const platsOf = k => [...new Set(k.deliv.map(d=>DELIV[d[0]].p))];
+
+/* ============ Matching: rule-based, explainable =============
+   Step 1  Hard requirements (pass/fail): platforms, min followers on main platform, city, applications open.
+   Step 2  Score out of 100:
+           Niche fit 30 · Audience fit 30 (gender 12, age 12, location 6) · Engagement 20 · Budget fit 15 · Reliability 5
+   Labels: 80+ Strong · 65–79 Good · below 65 Stretch                                                        */
+const BENCH = f => f<10000?4.0 : f<100000?3.0 : f<500000?2.0 : 1.4;
+const TIER = f => f<10000?'under 10K' : f<100000?'10K–100K' : f<500000?'100K–500K':'500K+';
+function band(s){ return s>=80?'strong':s>=65?'good':'stretch'; }
+const BAND_LABEL = {strong:'Strong match', good:'Good match', stretch:'Stretch'};
+
+function evaluate(c, k, quote){
+  const gates=[]; const plats=platsOf(k); const main=plats[0];
+  plats.forEach(p=>{ const has=!!c.platforms[p]; gates.push({ok:has, text: has? `Has a ${PLAT[p]} account` : `Requires a ${PLAT[p]} account`}); });
+  const mf = c.platforms[main] ? c.platforms[main].f : 0;
+  if(k.minF){ const ok = mf>=k.minF; gates.push({ok, text: ok ? `${fol(mf)} ${PLAT[main]} followers (minimum ${fol(k.minF)})` : `Needs ${fol(k.minF)}+ ${PLAT[main]} followers. Has ${fol(mf)}, ${fol(k.minF-mf)} short`, short: ok?null:`Needs ${fol(k.minF)}+ ${PLAT[main]} followers`}); }
+  if(k.city){ const ok = c.city===k.city; gates.push({ok, text: ok? `Based in ${k.city} (on-site requirement)` : `${k.city}-based creators only (on-site work). Based in ${c.city}`, short: ok?null:`${k.city}-based creators only`}); }
+  const open = k.status==='open' && daysTo(k.applyBy)>=0;
+  if(!open) gates.push({ok:false, text:'Applications closed'});
+  const eligible = gates.every(g=>g.ok);
+
+  const parts=[];
+  // Niche
+  let n=0, nn;
+  if(c.cats.slice(0,2).includes(k.cat)){ n=30; nn=`${k.cat} is a primary niche`; }
+  else if(c.cats.includes(k.cat)){ n=22; nn=`${k.cat} is a secondary niche`; }
+  else { const rel=c.cats.find(x=>(RELATED[x]||[]).includes(k.cat)); if(rel){ n=10; nn=`${k.cat} is close to their ${rel} content`; } else { n=0; nn=`${k.cat} is outside their niches`; } }
+  parts.push({key:'niche', label:'Niche fit', pts:n, max:30, note:nn});
+  // Audience
+  const t=k.target, a=c.aud;
+  const gShare = t.gender==='all'?1 : t.gender==='female'? a.female : 1-a.female;
+  const g = t.gender==='all'?12 : 12*Math.min(1,gShare/.75);
+  const ageShare = t.ages.reduce((s,x)=>s+a.ages[x],0);
+  const ag = 12*Math.min(1, ageShare/.8);
+  const geo = t.geo==='india'?6 : 6*Math.min(1, a.metro/.7);
+  const audParts=[];
+  if(t.gender!=='all') audParts.push(`${pct(gShare)} ${t.gender==='female'?'women':'men'}`);
+  audParts.push(`${pct(ageShare)} aged ${t.ages.map(x=>AGE_LABEL[x]).join(', ')}`);
+  if(t.geo==='metro') audParts.push(`${pct(a.metro)} in metros`);
+  parts.push({key:'aud', label:'Audience fit', pts:g+ag+geo, max:30, note:'Audience is '+audParts.join(' · '), sub:{g,ag,geo,gShare,ageShare}});
+  // Engagement on main platform
+  const pm = c.platforms[main] || Object.values(c.platforms)[0];
+  const bench = BENCH(pm.f); const e = 20*Math.min(1, pm.er/(bench*1.6));
+  parts.push({key:'eng', label:'Engagement', pts:e, max:20, note:`${pm.er}% engagement on ${PLAT[c.platforms[main]?main:'instagram']} vs ${bench.toFixed(1)}% typical for ${TIER(pm.f)} accounts`});
+  // Budget
+  let b, bn; const price = quote!=null ? quote : packageRate(c,k);
+  if(k.type==='Product only'){ b=3; bn='Product only, no fee'; }
+  else if(k.budget[1]>=price){ b=15; bn= quote!=null ? `Quote ${inrK(price)} is within the ${inrK(k.budget[0])}–${inrK(k.budget[1])} budget` : `Budget up to ${inrK(k.budget[1])} covers the usual ${inrK(price)} rate`; }
+  else if(k.budget[1]>=.8*price){ b=9; bn=`Pays up to ${inrK(k.budget[1])}, a little under the usual ${inrK(price)}`; }
+  else { b=3; bn=`Pays up to ${inrK(k.budget[1])}, well under the usual ${inrK(price)}`; }
+  parts.push({key:'budget', label:'Budget fit', pts:b, max:15, note:bn});
+  // Reliability
+  let r, rn;
+  if(c.done>=3){ r=5*c.onTime/c.done; rn=`${c.onTime} of ${c.done} past collaborations delivered on time`; }
+  else { r=4; rn=`New on Tessera (${c.done} collab${c.done===1?'':'s'}), scored neutral`; }
+  parts.push({key:'rel', label:'Reliability', pts:r, max:5, note:rn});
+
+  const score = Math.round(parts.reduce((s,p)=>s+p.pts,0));
+  const sorted = parts.slice().sort((x,y)=>(y.pts/y.max)-(x.pts/x.max));
+  const reasons = sorted.filter(p=>p.pts/p.max>=.8 && p.key!=='rel').map(p=>p.note);
+  const gaps = parts.filter(p=>p.pts/p.max<.6).map(p=>p.note);
+  return {eligible, gates, parts, score, band: band(score), reasons, gaps, failed: gates.filter(g=>!g.ok)};
+}
+
+/* ============ Icons ============ */
+const I = {
+  home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  compass:'<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
+  inbox:'<path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5 5h14l2 8v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6z"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  megaphone:'<path d="M3 10v4a1 1 0 0 0 1 1h3l6 4V5L7 9H4a1 1 0 0 0-1 1z"/><path d="M17 8a5 5 0 0 1 0 8"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5 6.5-5s5.5 1.5 6.5 5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 15c2 .6 3.2 2.2 3.5 5"/>',
+  star:'<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  bookmark:'<path d="M6 3h12v18l-6-4.5L6 21z"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
+  alert:'<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/>',
+  arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  back:'<path d="M19 12H5M11 6l-6 6 6 6"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+  bell:'<path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7"/><path d="M10 19a2 2 0 0 0 4 0"/>',
+  shield:'<path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/>',
+  rupee:'<path d="M7 4h10M7 8h10M7 4c5 0 7 1.5 7 4s-2 4-7 4l7 8"/>',
+  pin:'<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'
+};
+const ic = (n,cls='') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
+function ring(score, size=46, na=false){
+  const r=(size-5)/2, c=2*Math.PI*r, off = na? c : c*(1-score/100), cx=size/2;
+  return `<div class="ring ${na?'na':band(score)}" style="width:${size}px;height:${size}px" aria-label="${na?'Not eligible':'Match score '+score+' out of 100'}"><svg viewBox="0 0 ${size} ${size}"><circle class="bg" cx="${cx}" cy="${cx}" r="${r}"/><circle class="fg" cx="${cx}" cy="${cx}" r="${r}" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 ${cx} ${cx})"/></svg><span style="font-size:${size<44?12:14}px">${na?'–':score}</span></div>`;
+}
+const logo = (bk,size) => { const b=BRANDS[bk]; return `<div class="logo ${b.c}" ${size?`style="width:${size}px;height:${size}px;font-size:${Math.round(size*.4)}px"`:''}>${b.short}</div>`; };
+const avatar = (c,size) => `<div class="av ${avc(c.id)}" ${size?`style="width:${size}px;height:${size}px;font-size:${Math.round(size*.36)}px"`:''}>${initials(c.name)}</div>`;
+const STATUS = {applied:'Applied', shortlisted:'Shortlisted', offer:'Offer received', selected:'Confirmed', declined:'Not selected', withdrawn:'Withdrawn'};
+const STATUS_B = {applied:'New', shortlisted:'Shortlisted', offer:'Offer sent', selected:'Confirmed', declined:'Declined', withdrawn:'Withdrawn'};
+const pill = (st, brand) => `<span class="pill st-${st}">${(brand?STATUS_B:STATUS)[st]}</span>`;
+
+/* ============ Toast ============ */
+let tt; function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('on'),2800); }
+
+/* ============ Shell / routing ============ */
+const NAV = {
+  creator:[['c-home','Home','home'],['c-discover','Discover','compass'],['c-applications','Applications','inbox'],['c-profile','Profile','user']],
+  brand:[['b-home','Overview','grid'],['b-campaign','Campaign','megaphone'],['b-creators','Find creators','users'],['b-shortlist','Shortlist','star']]
+};
+function view(){ const h=location.hash.replace('#',''); const all=[...NAV.creator,...NAV.brand].map(x=>x[0]); return all.includes(h)? h : (S.role==='brand'?'b-home':'c-home'); }
+function go(v){ if(location.hash!=='#'+v) location.hash=v; else render(); window.scrollTo(0,0); }
+function navCount(id){
+  if(id==='c-applications') return myApps().filter(a=>['applied','shortlisted','offer'].includes(a.status)).length;
+  if(id==='c-discover'){ const m=me(); return openCampaigns().filter(k=>{const e=evaluate(m,k); return e.eligible && e.score>=80 && !appFor('cr01',k.id);}).length; }
+  if(id==='b-shortlist') return S.apps.filter(a=>a.status==='shortlisted' && isKora(a.k)).length;
+  if(id==='b-campaign') return appsOn(UI.kid).filter(a=>a.status==='applied').length;
+  return 0;
+}
+const isKora = kid => { const k=campaign(kid); return k && k.brand==='kora'; };
+function renderShell(v){
+  const role = v.startsWith('b-')?'brand':'creator';
+  if(S.role!==role){ S.role=role; persist(); }
+  document.getElementById('role-creator').classList.toggle('on', role==='creator');
+  document.getElementById('role-brand').classList.toggle('on', role==='brand');
+  document.getElementById('role-creator').setAttribute('aria-selected', role==='creator');
+  document.getElementById('role-brand').setAttribute('aria-selected', role==='brand');
+  const m=me();
+  const who = role==='creator'
+    ? `<div class="who">${avatar(m,38)}<div><div class="n">${m.name}</div><div class="s">${m.handle} · ${m.city}</div></div></div>`
+    : `<div class="who">${logo('kora')}<div><div class="n">Kora Botanics</div><div class="s">Brand workspace · Neha K.</div></div></div>`;
+  const items = NAV[role].map(([id,label,icn])=>{ const n=navCount(id); return `<button class="navi ${v===id?'on':''}" data-act="nav" data-v="${id}">${ic(icn)}${label}${n?`<span class="cnt">${n}</span>`:''}</button>`; }).join('');
+  const foot = role==='creator' ? `Payouts reach you 7 days after the brand approves content. Tessera's 15% fee is paid by the brand, not deducted from you.` : `You pay creator fees + 15% platform commission, only for creators who accept.`;
+  document.getElementById('side').innerHTML = who + items + `<div class="foot">${foot}</div>`;
+  document.getElementById('tabbar').innerHTML = NAV[role].map(([id,label,icn])=>`<button class="${v===id?'on':''}" data-act="nav" data-v="${id}">${ic(icn)}<span>${label.split(' ')[0]}</span></button>`).join('');
+}
+function render(){
+  const v=view(); renderShell(v);
+  const main=document.getElementById('main');
+  main.innerHTML = `<div class="wrap">${VIEWS[v]()}</div>`;
+  if(v==='c-discover') renderDiscoverResults();
+  if(v==='b-creators') renderFindResults();
+  document.title = 'Tessera · ' + [...NAV.creator,...NAV.brand].find(x=>x[0]===v)[1];
+}
+window.addEventListener('hashchange', render);
+
+/* ============ CREATOR VIEWS ============ */
+function openCampaigns(){ return campaigns().filter(k=>k.status==='open'); }
+function creatorFeed(){
+  const m=me();
+  return openCampaigns().map(k=>({k, e:evaluate(m,k), app:appFor('cr01',k.id)}));
+}
+function cHome(){
+  const m=me(); const feed=creatorFeed();
+  const strong = feed.filter(x=>x.e.eligible && x.e.score>=80 && !x.app);
+  const top = feed.filter(x=>x.e.eligible && !x.app).sort((a,b)=>b.e.score-a.e.score).slice(0,3);
+  const active = myApps().filter(a=>['applied','shortlisted','offer'].includes(a.status));
+  const booked = myApps().filter(a=>['selected','offer'].includes(a.status)).reduce((s,a)=>s+a.quote,0);
+  const strength = profileStrength();
+  const invites = S.invites.filter(i=>i.cr==='cr01' && !appFor('cr01',i.k));
+  const offers = myApps().filter(a=>a.status==='offer');
+  const banners = invites.map(i=>{const k=campaign(i.k); return `<div class="banner acc">${ic('mail')}<div class="t"><b>${BRANDS[k.brand].name} invited you to apply</b> to “${esc(k.title)}”. Invited creators are reviewed first.</div><button class="btn sm pri" data-act="openK" data-k="${k.id}">View campaign</button></div>`}).join('')
+    + offers.map(a=>{const k=campaign(a.k); return `<div class="banner gold">${ic('star')}<div class="t"><b>Offer from ${BRANDS[k.brand].name}:</b> ${inr(a.quote)} for “${esc(k.title)}”. Accept by ${fmtD(addDays(a.offerOn||todayISO(),3))}.</div><button class="btn sm" data-act="nav" data-v="c-applications">Review offer</button></div>`}).join('');
+  return `
+  <div class="pagehead"><div><div class="eyebrow">Tuesday, 10 November</div><h1>Good morning, ${m.name.split(' ')[0]}</h1><p>${strong.length} strong ${strong.length===1?'match is':'matches are'} open right now. Every score shows why you matched.</p></div>
+    <button class="btn pri" data-act="nav" data-v="c-discover">${ic('compass')}Browse your matches</button></div>
+  ${banners}
+  <div class="grid g4">
+    <div class="card kpi"><div class="eyebrow">Strong matches open</div><div class="v num">${strong.length}</div><div class="d">Score 80+ and you meet every requirement</div></div>
+    <div class="card kpi"><div class="eyebrow">Active applications</div><div class="v num">${active.length}</div><div class="d">${active.filter(a=>a.status==='shortlisted').length} shortlisted · ${active.filter(a=>a.status==='offer').length} offers</div></div>
+    <div class="card kpi"><div class="eyebrow">Booked this month</div><div class="v num">${inr(booked)}</div><div class="d">Confirmed + offered fees</div></div>
+    <div class="card kpi"><div class="eyebrow">Profile strength</div><div class="v num">${strength.pct}%</div><div class="bar" style="margin-top:8px"><i style="width:${strength.pct}%"></i></div></div>
+  </div>
+  <div class="split">
+    <div class="card">
+      <div class="pad row between"><div><h2>Top matches for you</h2><div class="small muted">Ranked by match score. You meet every hard requirement for these.</div></div><button class="btn ghost sm" data-act="explain">How scores work</button></div>
+      <div class="divider"></div>
+      <div class="list">${top.length? top.map(x=>miniCampaign(x)).join('') : `<div class="empty"><h3>You've applied to all your matches</h3><p>New campaigns go live most weekdays. We'll show them here first.</p></div>`}</div>
+      <div class="pad" style="padding-top:12px"><button class="btn sm" data-act="nav" data-v="c-discover">See all ${feed.filter(x=>x.e.eligible).length} campaigns you qualify for ${ic('arrow')}</button></div>
+    </div>
+    <div class="grid" style="gap:16px">
+      <div class="card">
+        <div class="pad row between"><h2>Applications</h2><button class="btn ghost sm" data-act="nav" data-v="c-applications">View all</button></div>
+        <div class="divider"></div>
+        <div class="list">${myApps().filter(a=>a.status!=='withdrawn').slice().sort((a,b)=>b.applied.localeCompare(a.applied)).slice(0,4).map(a=>{const k=campaign(a.k);return `<div class="li" style="grid-template-columns:1fr auto"><div style="min-width:0"><button class="name-btn" data-act="openK" data-k="${k.id}">${esc(k.title)}</button><div class="small muted">${BRANDS[k.brand].name} · ${appNextStep(a,k)}</div></div>${pill(a.status)}</div>`}).join('')}</div>
+      </div>
+      <div class="card pad sec">
+        <div class="row between"><h3>Finish your profile</h3><span class="small muted">${strength.done} of ${strength.items.length}</span></div>
+        ${strength.items.map(it=>`<div class="gate ${it.ok?'ok':'no'}" style="${it.ok?'':'color:var(--ink)'}">${ic(it.ok?'check':'info')}<div>${it.label}${it.ok?'':`<div class="small muted">${it.why}</div>`}</div></div>`).join('')}
+        ${strength.pct<100?`<button class="btn sm" data-act="nav" data-v="c-profile">Complete profile</button>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+function profileStrength(){
+  const m=me();
+  const items=[
+    {ok:true, label:'Instagram connected and verified', why:''},
+    {ok:true, label:'Audience insights synced', why:''},
+    {ok:Object.keys(m.rates).length>=3, label:'Rates set for your deliverables', why:''},
+    {ok:m.cats.length>=2, label:'At least two niches chosen', why:'Niche fit is 30% of every match score.'},
+    {ok:S.ytVerified, label:'YouTube audience verified', why:'Brands see a verified badge. Unverified numbers are shown as self-reported.'}
+  ];
+  const done=items.filter(i=>i.ok).length;
+  return {items, done, pct:Math.round(done/items.length*100)};
+}
+function appNextStep(a,k){
+  const decideBy = fmtD(addDays(k.applyBy,5));
+  return {applied:`Decision by ${decideBy}`, shortlisted:`Shortlisted · offers by ${decideBy}`, offer:'Respond to offer', selected:`Content due ${fmtD(k.due)}`, declined: a.reason||'Not selected', withdrawn:'Withdrawn'}[a.status];
+}
+function miniCampaign(x){
+  const k=x.k, e=x.e, d=daysTo(k.applyBy);
+  return `<div class="li" style="grid-template-columns:auto 1fr auto;align-items:start">${logo(k.brand)}<div style="min-width:0"><button class="name-btn" data-act="openK" data-k="${k.id}">${esc(k.title)}</button>
+   <div class="small muted">${BRANDS[k.brand].name} · <span class="comp">${compText(k)}</span> · <span class="${d<=3?'urgent':''}">${d===0?'closes today':d+' days left'}</span></div>
+   <div class="small" style="margin-top:6px;color:var(--ink-2)">${ic('check','').replace('<svg','<svg style="width:14px;height:14px;vertical-align:-2px;color:var(--accent)"')} ${esc(e.reasons[0]||e.parts[0].note)}</div></div>${ring(e.score,44)}</div>`;
+}
+
+/* ---------- Discover ---------- */
+function cDiscover(){
+  const nicheOpts = ['all',...CATS].map(c=>`<option value="${c}" ${UI.niche===c?'selected':''}>${c==='all'?'All niches':c}</option>`).join('');
+  return `
+  <div class="pagehead"><div><h1>Discover campaigns</h1><p>Campaigns you qualify for, ranked by how well they fit your audience and rates.</p></div>
+  <button class="btn ghost" data-act="explain">${ic('info')}How match scores work</button></div>
+  <div class="card pad sec">
+    <div class="filters">
+      <label class="search">${ic('search')}<input id="f-q" data-f="q" type="search" placeholder="Search brand, campaign or niche" value="${esc(UI.q)}" aria-label="Search campaigns"></label>
+      <select id="f-niche" class="sel" data-f="niche" aria-label="Niche">${nicheOpts}</select>
+      <select id="f-plat" class="sel" data-f="plat" aria-label="Platform"><option value="all">All platforms</option><option value="instagram" ${UI.plat==='instagram'?'selected':''}>Instagram</option><option value="youtube" ${UI.plat==='youtube'?'selected':''}>YouTube</option></select>
+      <select id="f-comp" class="sel" data-f="comp" aria-label="Minimum pay"><option value="0">Any pay</option>${[10000,25000,40000].map(v=>`<option value="${v}" ${+UI.comp===v?'selected':''}>Pays ${inrK(v)}+</option>`).join('')}</select>
+      <select id="f-type" class="sel" data-f="ctype" aria-label="Campaign type"><option value="all">All types</option>${['Paid','Paid + product','Product only'].map(v=>`<option ${UI.ctype===v?'selected':''}>${v}</option>`).join('')}</select>
+      <select id="f-sort" class="sel" data-f="sort" aria-label="Sort"><option value="match" ${UI.sort==='match'?'selected':''}>Sort: Best match</option><option value="pay" ${UI.sort==='pay'?'selected':''}>Sort: Highest pay</option><option value="closing" ${UI.sort==='closing'?'selected':''}>Sort: Closing soon</option><option value="new" ${UI.sort==='new'?'selected':''}>Sort: Newest</option></select>
+    </div>
+    <label class="toggle"><input id="f-aud" type="checkbox" data-f="audfit" ${UI.audfit?'checked':''}> Only show campaigns where my audience is a strong fit (audience score 24/30 or higher)</label>
+  </div>
+  <div class="tabs" role="tablist" id="dtabs"></div>
+  <div id="results"></div>`;
+}
+function discoverSets(){
+  const m=me(); let feed=creatorFeed();
+  const q=UI.q.trim().toLowerCase();
+  const f = feed.filter(({k,e})=>{
+    if(q && !(`${k.title} ${BRANDS[k.brand].name} ${k.cat}`.toLowerCase().includes(q))) return false;
+    if(UI.niche!=='all' && k.cat!==UI.niche) return false;
+    if(UI.plat!=='all' && !platsOf(k).includes(UI.plat)) return false;
+    if(+UI.comp>0){ const pay = k.type==='Product only'? 0 : k.budget[1]; if(pay < +UI.comp) return false; }
+    if(UI.ctype!=='all' && k.type!==UI.ctype) return false;
+    if(UI.audfit && e.parts[1].pts<24) return false;
+    if(!m.productOnly && k.type==='Product only') return false;
+    return true;
+  });
+  const sorters = {match:(a,b)=>b.e.score-a.e.score, pay:(a,b)=>(b.k.budget[1]||0)-(a.k.budget[1]||0), closing:(a,b)=>a.k.applyBy.localeCompare(b.k.applyBy), new:(a,b)=>b.k.posted.localeCompare(a.k.posted)};
+  f.sort(sorters[UI.sort]);
+  return {eligible:f.filter(x=>x.e.eligible), not:f.filter(x=>!x.e.eligible), saved:f.filter(x=>S.saved[x.k.id]), total:feed.length};
+}
+function renderDiscoverResults(){
+  const sets=discoverSets();
+  const tabs=[['eligible','You qualify',sets.eligible.length],['not','Not eligible yet',sets.not.length],['saved','Saved',sets.saved.length]];
+  const tabsEl=document.getElementById('dtabs'); if(!tabsEl) return;
+  tabsEl.innerHTML = tabs.map(([id,l,n])=>`<button class="tab ${UI.dtab===id?'on':''}" role="tab" aria-selected="${UI.dtab===id}" data-act="dtab" data-t="${id}">${l}<span class="cnt">${n}</span></button>`).join('');
+  const box=document.getElementById('results');
+  if(!UI.loaded.discover){
+    box.innerHTML = `<div class="cgrid">${[0,1,2,3].map(()=>`<div class="card ccard"><div class="row"><div class="skel" style="width:38px;height:38px;border-radius:9px"></div><div style="flex:1"><div class="skel" style="height:12px;width:40%"></div></div></div><div class="skel" style="height:18px;width:80%"></div><div class="skel" style="height:12px;width:60%"></div><div class="skel" style="height:34px"></div></div>`).join('')}</div>`;
+    setTimeout(()=>{ UI.loaded.discover=true; renderDiscoverResults(); }, 450);
+    return;
+  }
+  const list = sets[UI.dtab];
+  const filtersOn = UI.q||UI.niche!=='all'||UI.plat!=='all'||+UI.comp>0||UI.ctype!=='all'||UI.audfit;
+  const line = `<div class="resultline">${list.length} campaign${list.length===1?'':'s'}${filtersOn?' match your filters':''}${UI.dtab==='not'?'. These have a hard requirement you don\'t meet yet, so you can\'t apply. We show them so you know what to grow toward.':''}</div>`;
+  if(!list.length){
+    const msg = UI.dtab==='saved' ? ['Nothing saved yet','Save campaigns to compare them before applying.'] : UI.dtab==='not' ? ['You qualify for everything here','No campaigns in this view have requirements you miss.'] : ['No campaigns match these filters','Try a wider pay range or a different niche.'];
+    box.innerHTML = line + `<div class="card"><div class="empty"><div class="ic">${ic('search')}</div><h3>${msg[0]}</h3><p>${msg[1]}</p>${filtersOn?'<button class="btn sm" data-act="clearF">Clear filters</button>':''}</div></div>`;
+    return;
+  }
+  box.innerHTML = line + `<div class="cgrid" style="margin-top:12px">${list.map(campaignCard).join('')}</div>`;
+}
+function campaignCard({k,e,app}){
+  const b=BRANDS[k.brand], d=daysTo(k.applyBy);
+  const inv = invited('cr01',k.id);
+  const status = app ? pill(app.status) : inv ? '<span class="chip acc">Invited by brand</span>' : '';
+  const reason = e.eligible
+    ? `<div class="reason">${ic('check')}<span>${esc(e.reasons[0]||'Meets all requirements')}${e.gaps.length?`<br><span class="muted">Weaker: ${esc(e.gaps[0])}</span>`:''}</span></div>`
+    : `<div class="reason warn">${ic('alert')}<span>${esc(e.failed[0].text)}</span></div>`;
+  return `<article class="card ccard">
+    <div class="row" style="align-items:flex-start">${logo(k.brand)}<div style="flex:1;min-width:0"><div class="small" style="font-weight:600">${b.name}</div><div class="small muted">${k.cat} · ${k.type}</div></div>
+      <div style="text-align:center">${ring(e.score,48,!e.eligible)}<div class="band ${e.eligible?e.band:''}" style="margin-top:2px;${e.eligible?'':'color:var(--ink-3)'}">${e.eligible?BAND_LABEL[e.band]:'Not eligible'}</div></div></div>
+    <button class="title" data-act="openK" data-k="${k.id}">${esc(k.title)}</button>
+    <div class="row wrapf" style="gap:6px">${k.deliv.map(([t,n])=>`<span class="chip">${n} × ${DELIV[t].label}</span>`).join('')}</div>
+    <div class="meta"><span class="comp" style="color:var(--ink)">${ic('rupee')}${compText(k)}${k.type==='Paid + product'?' + product':''}</span><span class="${d<=3?'urgent':''}">${ic('clock')}Apply by ${fmtD(k.applyBy)} · ${d===0?'today':d+'d left'}</span><span>${ic('users')}${k.slots} slots · ${applicantCount(k)} applied</span>${k.city?`<span>${ic('pin')}${k.city} only</span>`:''}</div>
+    ${reason}
+    <div class="row between"><div>${status}</div><div class="row" style="gap:8px">
+      <button class="iconbtn ${S.saved[k.id]?'on':''}" data-act="save" data-k="${k.id}" aria-label="${S.saved[k.id]?'Remove from saved':'Save campaign'}" title="${S.saved[k.id]?'Saved':'Save'}">${ic('bookmark')}</button>
+      <button class="btn sm ${e.eligible&&!app?'pri':''}" data-act="openK" data-k="${k.id}">${e.eligible&&!app?'View & apply':'View details'}</button></div></div>
+  </article>`;
+}
+
+/* ---------- Campaign detail drawer (creator) ---------- */
+function openK(kid){
+  const k=campaign(kid), b=BRANDS[k.brand], m=me(), e=evaluate(m,k), app=appFor('cr01',kid), d=daysTo(k.applyBy);
+  const inv=invited('cr01',kid);
+  const closed = k.status!=='open';
+  let foot;
+  if(app) foot = `${pill(app.status)}<span class="small muted" style="flex:1">${appNextStep(app,k)}</span><button class="btn" data-act="nav" data-v="c-applications">View application</button>`;
+  else if(closed) foot = `<span class="small muted" style="flex:1">Applications for this campaign are closed.</span>`;
+  else if(!e.eligible) foot = `<span class="small" style="flex:1;color:var(--gold)">${esc(e.failed[0].short||e.failed[0].text)}</span><button class="btn ${S.watch[kid]?'':'pri'}" data-act="watch" data-k="${kid}">${ic('bell')}${S.watch[kid]?'We\'ll notify you':'Notify me if I qualify'}</button>`;
+  else foot = `<span class="small muted" style="flex:1">${d===0?'Closes today':`Closes in ${d} days`} · ${k.slots} slots · ${applicantCount(k)} applied</span><button class="btn pri lg" data-act="apply" data-k="${kid}">Apply to campaign</button>`;
+  openDrawer(`
+  <div class="dhead"><button class="iconbtn" data-act="close" aria-label="Close">${ic('x')}</button>${logo(k.brand)}<div style="min-width:0;flex:1"><div class="small muted">${b.name} · ${k.cat}</div><h2 style="font-size:17px">${esc(k.title)}</h2></div></div>
+  <div class="dbody">
+    ${inv && !app ? `<div class="banner acc">${ic('mail')}<div class="t"><b>You were invited.</b> ${b.name} picked you from suggested creators. Invited applications are reviewed first.</div></div>`:''}
+    <div class="card pad row" style="gap:16px;align-items:center">
+      ${ring(e.score,64,!e.eligible)}
+      <div style="flex:1;min-width:0">${e.eligible?`<div class="band ${e.band}" style="font-size:13px">${BAND_LABEL[e.band]}</div><div class="ink2 small">${e.reasons.length?'Why you match: '+esc(e.reasons.slice(0,2).join('; ')).toLowerCase():'You meet every hard requirement.'}</div>`:`<div class="band" style="color:var(--gold);font-size:13px">Not eligible yet</div><div class="ink2 small">${esc(e.failed.map(f=>f.text).join('. '))}.</div>`}</div>
+    </div>
+    <div class="card pad sec"><div class="row between"><h3>Match breakdown</h3><button class="btn ghost sm" data-act="explain">How this is calculated</button></div>
+      <div class="breakdown">${e.parts.map(p=>`<div class="bd"><span>${p.label}</span><div class="bar ${p.pts/p.max<.6?'gold':''}"><i style="width:${Math.round(p.pts/p.max*100)}%"></i></div><span class="pts">${Math.round(p.pts)}/${p.max}</span><span class="note">${esc(p.note)}</span></div>`).join('')}</div>
+      <div class="small muted">Scores use your connected Instagram${S.ytVerified?' and YouTube':''} data and the rates on your profile. Brands see the same breakdown.</div>
+    </div>
+    <div class="card pad sec"><h3>Requirements</h3>${e.gates.map(g=>`<div class="gate ${g.ok?'ok':'no'}">${ic(g.ok?'check':'x')}<span>${esc(g.text)}</span></div>`).join('')}</div>
+    <div class="card pad sec"><h3>The brief</h3><p style="margin:0" class="ink2">${esc(k.brief)}</p>
+      ${k.dos&&k.dos.length?`<div class="grid g2" style="gap:14px"><div><div class="eyebrow" style="margin-bottom:6px">Do</div><ul class="ul">${k.dos.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>${k.donts&&k.donts.length?`<div><div class="eyebrow" style="margin-bottom:6px">Don't</div><ul class="ul">${k.donts.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}</div>`:''}</div>
+    <div class="card pad sec"><h3>Deliverables, pay and timeline</h3>
+      <dl class="kv">
+        <dt>Deliverables</dt><dd>${delivText(k)}</dd>
+        <dt>Pay per creator</dt><dd class="num"><b>${k.type==='Product only'?'No fee':inr(k.budget[0])+' – '+inr(k.budget[1])}</b>${k.productValue?` · product worth ${inr(k.productValue)}`:''}<div class="small muted">Your usual rate for this package: ${inr(packageRate(m,k))}</div></dd>
+        <dt>Apply by</dt><dd>${fmtD(k.applyBy)} 2026</dd>
+        <dt>Brand decides by</dt><dd>${fmtD(addDays(k.applyBy,5))}. If they don't, your application closes automatically.</dd>
+        <dt>Content due</dt><dd>${fmtD(k.due)}</dd>
+        <dt>Payment</dt><dd>Paid by Tessera 7 days after the brand approves your content</dd>
+        <dt>Audience wanted</dt><dd>${k.target.gender==='all'?'All genders':k.target.gender==='female'?'Mostly women':'Mostly men'} · ${k.target.ages.map(x=>AGE_LABEL[x]).join(', ')} · ${k.target.geo==='metro'?'Metro cities':'All India'}</dd>
+      </dl></div>
+    <div class="card pad sec"><div class="row">${logo(k.brand)}<div><h3>${b.name}</h3><div class="small muted">${esc(b.about)}</div></div></div>
+      <div class="grid g4" style="gap:10px">
+        <div class="stat"><b>${b.run}</b><small>campaigns run</small></div>
+        <div class="stat"><b>~${b.respond} days</b><small>to respond</small></div>
+        <div class="stat"><b>${b.paidOnTime}%</b><small>paid on time</small></div>
+        <div class="stat"><b>${fmtD(k.posted)}</b><small>posted</small></div>
+      </div></div>
+  </div>
+  <div class="dfoot">${foot}</div>`);
+}
+
+/* ---------- Apply flow ---------- */
+let AF=null;
+function startApply(kid){
+  const k=campaign(kid), m=me();
+  const rate=packageRate(m,k);
+  const def = k.type==='Product only'?0 : Math.min(rate, k.budget[1]);
+  AF={kid, step:1, quote:def, pitch:'', link:'', canDeliver:false, disclose:false, errors:{}, submitting:false, done:false};
+  renderApply();
+}
+function renderApply(){
+  const k=campaign(AF.kid), b=BRANDS[k.brand], m=me(), rate=packageRate(m,k);
+  const steps=['Confirm terms','Your pitch','Review'];
+  const head = `<div class="mhead"><div style="flex:1;min-width:0"><div class="small muted">Apply to ${b.name}</div><h2>${esc(k.title)}</h2>${AF.done?'':`<div class="stepper" style="margin-top:6px">${steps.map((s,i)=>i+1===AF.step?`<b>${i+1}. ${s}</b>`:`<span>${i+1}. ${s}</span>`).join('<span>›</span>')}</div>`}</div><button class="iconbtn" data-act="close" aria-label="Close">${ic('x')}</button></div>`;
+  let body='', foot='';
+  if(AF.done){
+    const e=evaluate(m,k,AF.quote);
+    body = `<div class="success"><div class="ic">${ic('check')}</div><h2>Application sent to ${b.name}</h2>
+      <p class="ink2" style="margin:0;max-width:440px">They usually respond in about ${b.respond} days. You'll hear back by <b>${fmtD(addDays(k.applyBy,5))}</b>. If they haven't decided by then, we close the application so you're not left waiting.</p>
+      <div class="card pad" style="width:100%;text-align:left"><dl class="kv"><dt>Your quote</dt><dd class="num">${k.type==='Product only'?'Product only':inr(AF.quote)}</dd><dt>Match score</dt><dd>${e.score} · ${BAND_LABEL[e.band]}</dd><dt>Status</dt><dd>${pill('applied')}</dd></dl></div></div>`;
+    foot = `<button class="btn" data-act="close">Keep browsing</button><button class="btn pri" data-act="nav" data-v="c-applications">Track application</button>`;
+  } else if(AF.step===1){
+    const over = k.type!=='Product only' && AF.quote>k.budget[1];
+    body = `<div class="card pad sec" style="background:var(--surface-2);border:0"><div class="eyebrow">You'll deliver</div><div>${delivText(k)}</div><div class="small muted">Content due ${fmtD(k.due)} · ${k.type}</div></div>
+    ${k.type==='Product only' ? `<div class="banner">${ic('info')}<div class="t">This campaign is product only (worth ${inr(k.productValue)}). There's no fee to quote.</div></div>` : `
+    <div class="field"><label for="ap-quote">Your quote for this package</label>
+      <div class="prefix"><span>₹</span><input id="ap-quote" class="input num ${AF.errors.quote?'bad':''}" inputmode="numeric" data-af="quote" value="${AF.quote||''}"></div>
+      <div class="hint">Brand budget: ${inr(k.budget[0])} – ${inr(k.budget[1])} per creator. Your usual rate for this package: ${inr(rate)}. You keep 100% of your quote.</div>
+      ${AF.errors.quote?`<div class="err">${AF.errors.quote}</div>`:over?`<div class="err" style="color:var(--gold)">This is above the brand's budget. Quotes above budget are rarely shortlisted.</div>`:''}
+    </div>`}
+    <label class="confirm" for="ap-deliver"><input id="ap-deliver" type="checkbox" data-af="canDeliver" ${AF.canDeliver?'checked':''}><span>I can deliver by <b>${fmtD(k.due)}</b>.</span></label>
+    ${AF.errors.canDeliver?`<div class="err" style="color:var(--bad);font-size:12px;margin-top:-8px">${AF.errors.canDeliver}</div>`:''}`;
+    foot = `<button class="btn" data-act="close">Cancel</button><button class="btn pri" data-act="afNext">Continue</button>`;
+  } else if(AF.step===2){
+    const n=AF.pitch.trim().length;
+    body = `<div class="field"><label for="ap-pitch">Why are you a good fit?</label>
+      <textarea id="ap-pitch" class="input ${AF.errors.pitch?'bad':''}" data-af="pitch" maxlength="600" placeholder="What does your audience care about, and how would you show the product? Brands read this first.">${esc(AF.pitch)}</textarea>
+      <div class="row between"><span class="hint">80–600 characters. Specific beats long.</span><span class="hint num" id="ap-count">${n}/600</span></div>
+      ${AF.errors.pitch?`<div class="err">${AF.errors.pitch}</div>`:''}</div>
+    <div class="field"><label for="ap-link">Link to a post like this one <span class="muted">(optional)</span></label>
+      <input id="ap-link" class="input ${AF.errors.link?'bad':''}" data-af="link" placeholder="https://www.instagram.com/reel/..." value="${esc(AF.link)}">
+      ${AF.errors.link?`<div class="err">${AF.errors.link}</div>`:''}</div>
+    <label class="confirm" for="ap-disclose"><input id="ap-disclose" type="checkbox" data-af="disclose" ${AF.disclose?'checked':''}><span>I'll label this as a paid partnership, as ASCI's influencer advertising guidelines require.</span></label>
+    ${AF.errors.disclose?`<div class="err" style="color:var(--bad);font-size:12px;margin-top:-8px">${AF.errors.disclose}</div>`:''}`;
+    foot = `<button class="btn" data-act="afBack">Back</button><button class="btn pri" data-act="afNext">Review application</button>`;
+  } else {
+    const e=evaluate(m,k,AF.quote);
+    body = `<div class="card pad"><dl class="kv">
+      <dt>Campaign</dt><dd>${esc(k.title)}</dd>
+      <dt>Deliverables</dt><dd>${delivText(k)}</dd>
+      <dt>Your quote</dt><dd class="num"><b>${k.type==='Product only'?'Product only':inr(AF.quote)}</b></dd>
+      <dt>Pitch</dt><dd class="ink2" style="white-space:pre-wrap">${esc(AF.pitch.trim())}</dd>
+      ${AF.link?`<dt>Sample post</dt><dd style="word-break:break-all">${esc(AF.link)}</dd>`:''}
+      <dt>Brand will see</dt><dd>Your profile, match score <b>${e.score}</b> and its breakdown, your pitch and quote</dd>
+    </dl></div>
+    <div class="small muted">You can withdraw until the brand sends an offer.</div>`;
+    foot = `<button class="btn" data-act="afBack" ${AF.submitting?'disabled':''}>Back</button><button class="btn pri" data-act="afSubmit" ${AF.submitting?'disabled':''}>${AF.submitting?'<span class="spinner"></span>Sending…':'Submit application'}</button>`;
+  }
+  openModal(head + `<div class="mbody">${body}</div><div class="mfoot">${foot}</div>`);
+}
+function validateApply(){
+  const k=campaign(AF.kid); AF.errors={};
+  if(AF.step===1){
+    if(k.type!=='Product only'){ const q=+String(AF.quote).replace(/[^\d]/g,''); AF.quote=q; if(!q) AF.errors.quote='Enter your quote in rupees.'; else if(q<1000) AF.errors.quote='Quotes start at ₹1,000.'; }
+    if(!AF.canDeliver) AF.errors.canDeliver='Confirm you can deliver by the due date.';
+  }
+  if(AF.step===2){
+    const n=AF.pitch.trim().length;
+    if(n<80) AF.errors.pitch=`Add a little more. ${80-n} more characters needed.`;
+    if(AF.link && !/^https:\/\/\S+\.\S+/.test(AF.link.trim())) AF.errors.link='Use a full link starting with https://';
+    if(!AF.disclose) AF.errors.disclose='This confirmation is required for paid campaigns.';
+  }
+  return !Object.keys(AF.errors).length;
+}
+function submitApply(){
+  AF.submitting=true; renderApply();
+  setTimeout(()=>{
+    const k=campaign(AF.kid);
+    S.apps.push({id:'n'+(S.seq++), cr:'cr01', k:AF.kid, status:'applied', quote:k.type==='Product only'?0:AF.quote, pitch:AF.pitch.trim(), link:AF.link.trim(), applied:todayISO(), viewed:false});
+    persist(); AF.submitting=false; AF.done=true; renderApply(); render();
+  }, 800);
+}
+
+/* ---------- Applications ---------- */
+function cApps(){
+  const all=myApps().slice().sort((a,b)=>b.applied.localeCompare(a.applied));
+  const groups={all:all, active:all.filter(a=>['applied','shortlisted'].includes(a.status)), offers:all.filter(a=>['offer','selected'].includes(a.status)), closed:all.filter(a=>['declined','withdrawn'].includes(a.status))};
+  const list=groups[UI.appsf];
+  const tabs=[['all','All'],['active','In review'],['offers','Offers & confirmed'],['closed','Closed']];
+  return `<div class="pagehead"><div><h1>Applications</h1><p>Every application shows where it stands and when the brand has to decide.</p></div></div>
+  <div class="tabs">${tabs.map(([id,l])=>`<button class="tab ${UI.appsf===id?'on':''}" data-act="appsf" data-t="${id}">${l}<span class="cnt">${groups[id].length}</span></button>`).join('')}</div>
+  <div class="card">${list.length?`<div class="thead li-app"><span>Campaign</span><span class="hide-m">Progress</span><span class="hide-m">Your quote</span><span>Status</span></div><div class="list">${list.map(appRow).join('')}</div>`
+   :`<div class="empty"><div class="ic">${ic('inbox')}</div><h3>No applications here</h3><p>${UI.appsf==='offers'?'Offers show up here when a brand picks you.':'Apply to a campaign and track it here.'}</p><button class="btn sm pri" data-act="nav" data-v="c-discover">Find campaigns</button></div>`}</div>`;
+}
+function appRow(a){
+  const k=campaign(a.k);
+  const order=['applied','viewed','shortlisted','offer','selected'];
+  const stage = a.status==='declined'||a.status==='withdrawn' ? -1 : a.status==='applied' ? (a.viewed?1:0) : order.indexOf(a.status);
+  const labels=['Applied','Viewed','Shortlisted','Offer','Confirmed'];
+  const prog = stage<0 ? `<div class="steps bad">${labels.map((_,i)=>`<i class="${i===0?'on':''}"></i>`).join('')}</div><div class="small muted" style="margin-top:4px">${esc(a.status==='withdrawn'?'You withdrew':a.reason)}</div>`
+    : `<div class="steps">${labels.map((_,i)=>`<i class="${i<=stage?'on':''}"></i>`).join('')}</div><div class="small muted" style="margin-top:4px">${labels[stage]} · ${appNextStep(a,k)}</div>`;
+  let actions='';
+  if(a.status==='offer') actions=`<button class="btn sm pri" data-act="acceptOffer" data-a="${a.id}">Accept offer</button>`;
+  else if(['applied','shortlisted'].includes(a.status)) actions=`<button class="btn sm ghost" data-act="withdraw" data-a="${a.id}">Withdraw</button>`;
+  return `<div class="li li-app"><div class="row" style="min-width:0">${logo(k.brand,34)}<div style="min-width:0"><button class="name-btn" data-act="openK" data-k="${k.id}">${esc(k.title)}</button><div class="small muted">${BRANDS[k.brand].name} · applied ${fmtD(a.applied)}</div>${a.note&&a.status==='declined'?`<div class="small" style="color:var(--ink-2);margin-top:2px">${esc(a.note)}</div>`:''}</div></div>
+   <div class="hide-m">${prog}</div><div class="hide-m num">${a.quote?inr(a.quote):'Product only'}</div>
+   <div class="row" style="justify-content:flex-end;gap:8px;flex-wrap:wrap">${pill(a.status)}${actions}</div></div>`;
+}
+
+/* ---------- Profile ---------- */
+let PF=null;
+function cProfile(){
+  const m=me(); if(!PF) PF={cats:m.cats.slice(), city:m.city, rates:Object.assign({},m.rates), productOnly:m.productOnly, errors:{}};
+  const a=m.aud;
+  return `<div class="pagehead"><div><h1>Your profile</h1><p>This is what brands see, and what your match scores are built from.</p></div></div>
+  <div class="split">
+    <div class="grid" style="gap:16px">
+      <div class="card pad sec"><div class="row">${avatar(m,56)}<div><h2>${m.name}</h2><div class="small muted">${m.handle} · ${m.city} · ${m.langs}</div></div></div><p class="ink2" style="margin:0">${esc(m.bio)}</p></div>
+      <div class="card pad sec"><div class="row between"><h3>Niches</h3><span class="small muted">Pick up to 3. The first two count as primary.</span></div>
+        <div class="checks">${CATS.map(c=>`<label class="checkchip"><input type="checkbox" data-pf="cat" value="${c}" ${PF.cats.includes(c)?'checked':''}><span>${PF.cats.indexOf(c)>-1?(PF.cats.indexOf(c)+1)+'. ':''}${c}</span></label>`).join('')}</div>
+        ${PF.errors.cats?`<div class="err" style="color:var(--bad);font-size:12px">${PF.errors.cats}</div>`:''}
+      </div>
+      <div class="card pad sec"><h3>Rates</h3><div class="small muted" style="margin-top:-4px">Used to check whether a campaign's budget fits you. You can still quote differently on each application.</div>
+        <div class="fgrid">${Object.keys(DELIV).filter(t=>m.platforms[DELIV[t].p]).map(t=>`<div class="field"><label for="pf-${t}">${DELIV[t].label}</label><div class="prefix"><span>₹</span><input id="pf-${t}" class="input num ${PF.errors[t]?'bad':''}" inputmode="numeric" data-pf="rate" data-t="${t}" value="${PF.rates[t]||''}"></div>${PF.errors[t]?`<div class="err">${PF.errors[t]}</div>`:''}</div>`).join('')}</div></div>
+      <div class="card pad sec"><h3>Preferences</h3>
+        <div class="field"><label for="pf-city">Based in</label><select id="pf-city" class="sel" data-pf="city">${CITIES.map(c=>`<option ${PF.city===c?'selected':''}>${c}</option>`).join('')}</select><div class="hint">Some campaigns need creators in a city for on-site shoots.</div></div>
+        <label class="toggle"><input id="pf-po" type="checkbox" data-pf="po" ${PF.productOnly?'checked':''}> Show product-only (no fee) campaigns</label>
+      </div>
+      <div class="row" style="justify-content:flex-end;gap:10px"><button class="btn" data-act="pfReset">Discard changes</button><button class="btn pri" data-act="pfSave">Save profile</button></div>
+    </div>
+    <div class="grid" style="gap:16px">
+      <div class="card pad sec"><h3>Platforms</h3><div class="plat">${Object.entries(m.platforms).map(([p,v])=>`<div class="platbox"><div class="row between"><span class="small" style="font-weight:600">${PLAT[p]}</span>${m.verified[p]?`<span class="chip acc">${ic('shield').replace('<svg','<svg style="width:12px;height:12px"')}Verified</span>`:'<span class="chip gold">Self-reported</span>'}</div><div class="v num">${fol(v.f)}</div><div class="small muted">${v.er}% engagement · typical for ${TIER(v.f)}: ${BENCH(v.f).toFixed(1)}%</div></div>`).join('')}</div>
+        ${S.ytVerified?'':`<button class="btn sm" data-act="connectYT">${ic('shield')}Verify YouTube with Google sign-in</button>`}</div>
+      <div class="card pad sec"><div class="row between"><h3>Audience</h3><span class="small muted">From Instagram insights · synced 8 Nov</span></div>
+        <div class="aud hl"><span>Women</span><div class="bar"><i style="width:${pct(a.female)}"></i></div><span class="num">${pct(a.female)}</span></div>
+        <div class="aud"><span>Men</span><div class="bar"><i style="width:${pct(1-a.female)}"></i></div><span class="num">${pct(1-a.female)}</span></div>
+        <div class="divider"></div>
+        ${AGES.map(x=>`<div class="aud ${a.ages[x]>=.3?'hl':''}"><span>${AGE_LABEL[x]}</span><div class="bar"><i style="width:${pct(a.ages[x])}"></i></div><span class="num">${pct(a.ages[x])}</span></div>`).join('')}
+        <div class="divider"></div>
+        <div class="aud hl"><span>Metros</span><div class="bar"><i style="width:${pct(a.metro)}"></i></div><span class="num">${pct(a.metro)}</span></div>
+        <div class="small muted">Top cities: ${a.cities}</div></div>
+      <div class="card pad sec"><h3>Track record</h3><div class="grid g2" style="gap:10px"><div class="stat"><b>${m.done}</b><small>collaborations completed</small></div><div class="stat"><b>${m.onTime} of ${m.done}</b><small>delivered on time</small></div></div></div>
+    </div>
+  </div>`;
+}
+
+/* ============ BRAND VIEWS ============ */
+function koraCampaigns(){ return campaigns().filter(k=>k.brand==='kora'); }
+function bHome(){
+  const live = koraCampaigns().filter(k=>k.status==='open');
+  const apps = live.flatMap(k=>appsOn(k.id));
+  const pending = apps.filter(a=>a.status==='applied');
+  const strongNew = pending.filter(a=>evaluate(creator(a.cr),campaign(a.k),a.quote).score>=80);
+  const k1=campaign('k01'); const sl=appsOn('k01').filter(a=>['shortlisted','offer','selected'].includes(a.status)).length;
+  const avg = apps.length? Math.round(apps.reduce((s,a)=>s+evaluate(creator(a.cr),campaign(a.k),a.quote).score,0)/apps.length):0;
+  const rows = koraCampaigns().map(k=>campaignRow(k)).join('') + KORA_OTHERS.filter(o=>o.status==='production' || (o.status==='draft' && S.drafts[o.id])).map(o=>otherRow(o)).join('');
+  return `<div class="pagehead"><div><div class="eyebrow">Kora Botanics</div><h1>Campaigns overview</h1><p>Applicants arrive ranked by fit, so you review the best ones first.</p></div>
+    <button class="btn pri" data-act="newCampaign">${ic('plus')}New campaign</button></div>
+  ${pending.length?`<div class="banner acc">${ic('users')}<div class="t"><b>${pending.length} applicants waiting for review</b>, ${strongNew.length} of them strong matches. Monsoon Barrier Serum closes ${fmtD(k1.applyBy)} with ${sl} of ${k1.slots} slots shortlisted.</div><button class="btn sm pri" data-act="openCampaign" data-k="k01">Review applicants</button></div>`:''}
+  <div class="grid g4">
+    <div class="card kpi"><div class="eyebrow">Live campaigns</div><div class="v num">${live.length}</div><div class="d">Accepting applications</div></div>
+    <div class="card kpi"><div class="eyebrow">Applicants</div><div class="v num">${apps.length}</div><div class="d">Across live campaigns</div></div>
+    <div class="card kpi"><div class="eyebrow">Avg. match score</div><div class="v num">${avg||'–'}</div><div class="d">Of everyone who applied</div></div>
+    <div class="card kpi"><div class="eyebrow">Slots filled</div><div class="v num">${sl}/${k1.slots}</div><div class="bar" style="margin-top:8px"><i style="width:${Math.round(sl/k1.slots*100)}%"></i></div></div>
+  </div>
+  <div class="card"><div class="pad row between"><h2>Your campaigns</h2></div>
+    <div class="thead li-camp"><span>Campaign</span><span class="hide-m">Status</span><span class="hide-m">Applicants</span><span class="hide-m">Slots</span><span></span></div>
+    <div class="list">${rows}</div></div>`;
+}
+function campaignRow(k){
+  const ap=appsOn(k.id); const filled=ap.filter(a=>['shortlisted','offer','selected'].includes(a.status)).length;
+  const strong=ap.filter(a=>evaluate(creator(a.cr),k,a.quote).score>=80).length;
+  return `<div class="li li-camp"><div style="min-width:0"><button class="name-btn" data-act="openCampaign" data-k="${k.id}">${esc(k.title)}</button><div class="small muted">${delivText(k)} · ${compText(k)}</div></div>
+  <div class="hide-m"><span class="chip acc">Live · closes ${fmtD(k.applyBy)}</span></div>
+  <div class="hide-m stat"><b>${ap.length}</b><small>${strong} strong matches</small></div>
+  <div class="hide-m"><div class="small num">${filled} of ${k.slots}</div><div class="bar" style="margin-top:4px"><i style="width:${Math.round(filled/k.slots*100)}%"></i></div></div>
+  <div><button class="btn sm" data-act="openCampaign" data-k="${k.id}">Open</button></div></div>`;
+}
+function otherRow(o){
+  if(o.status==='production') return `<div class="li li-camp"><div><span style="font-weight:600">${esc(o.title)}</span><div class="small muted">Content due ${fmtD(o.due)} · ${inr(o.spend)} committed</div></div><div class="hide-m"><span class="chip good">In production</span></div><div class="hide-m stat"><b>Closed</b><small>applications</small></div><div class="hide-m"><div class="small num">${o.confirmed} of ${o.slots}</div><div class="bar" style="margin-top:4px"><i style="width:100%"></i></div></div><div><span class="small muted">Outside MVP</span></div></div>`;
+  return `<div class="li li-camp"><div><span style="font-weight:600">${esc(o.title)}</span><div class="small muted">Draft · not visible to creators</div></div><div class="hide-m"><span class="chip">Draft</span></div><div class="hide-m stat"><b>–</b><small>not live</small></div><div class="hide-m small muted">${o.draft.slots} slots planned</div><div><button class="btn sm" data-act="draftCampaign" data-k="${o.id}">Finish draft</button></div></div>`;
+}
+
+/* ---------- Campaign workspace ---------- */
+function bCampaign(){
+  let ks=koraCampaigns(); if(!ks.find(k=>k.id===UI.kid)) UI.kid='k01';
+  const k=campaign(UI.kid);
+  const ap=appsOn(k.id).map(a=>({a, c:creator(a.cr), e:evaluate(creator(a.cr),k,a.quote)}));
+  const appliedIds=new Set(ap.map(x=>x.c.id));
+  const suggested = creators().filter(c=>!appliedIds.has(c.id) && !S.apps.some(a=>a.cr===c.id&&a.k===k.id)).map(c=>({c, e:evaluate(c,k)})).filter(x=>x.e.eligible && x.e.score>=70).sort((a,b)=>b.e.score-a.e.score);
+  const review = ap.filter(x=>['applied','shortlisted'].includes(x.a.status));
+  const shortlisted = ap.filter(x=>['shortlisted','offer','selected'].includes(x.a.status));
+  const declined = ap.filter(x=>x.a.status==='declined');
+  let list = UI.ctab==='applicants'? ap.filter(x=>x.a.status==='applied') : UI.ctab==='short'? shortlisted : UI.ctab==='declined'? declined : suggested;
+  if(UI.ctab==='applicants' && UI.band!=='all') list=list.filter(x=>x.e.band===UI.band);
+  const sorts={match:(x,y)=>y.e.score-x.e.score, eng:(x,y)=>maxER(y.c)-maxER(x.c), quote:(x,y)=>(x.a?x.a.quote:0)-(y.a?y.a.quote:0)};
+  list=list.slice().sort(sorts[UI.bsort]);
+  const filled=shortlisted.length; const d=daysTo(k.applyBy);
+  const tabs=[['applicants','To review',ap.filter(x=>x.a.status==='applied').length],['short','Shortlisted',shortlisted.length],['suggested','Suggested',suggested.length],['declined','Declined',declined.length]];
+  const sel = ks.length>1 ? `<select id="b-k" class="sel" data-f="kid" aria-label="Campaign">${ks.map(x=>`<option value="${x.id}" ${x.id===k.id?'selected':''}>${esc(x.title)}</option>`).join('')}</select>`:'';
+  let content;
+  if(!list.length){
+    const msgs={applicants:[UI.band!=='all'?'No applicants in this band':'All caught up','You have reviewed every new applicant. Check Suggested for strong creators who haven\'t applied.'],short:['No one shortlisted yet','Shortlist applicants from To review. You need '+k.slots+' creators.'],suggested:['No more strong suggestions','Every eligible creator scoring 70+ has applied or been invited.'],declined:['No declined applicants','']};
+    content = `<div class="empty"><div class="ic">${ic('users')}</div><h3>${msgs[UI.ctab][0]}</h3><p>${msgs[UI.ctab][1]}</p>${UI.ctab==='applicants'&&suggested.length?`<button class="btn sm" data-act="ctab" data-t="suggested">See ${suggested.length} suggested creators</button>`:''}</div>`;
+  } else {
+    content = `<div class="thead li-cand"><span>Creator</span><span class="hide-m">Reach</span><span class="hide-m">Why they match</span><span>Match</span><span></span></div><div class="list">${list.map(x=>candRow(x,k)).join('')}</div>`;
+  }
+  const shortlistNow = ap.filter(x=>x.a.status==='shortlisted').length;
+  return `<div class="pagehead"><div style="min-width:0"><div class="row wrapf" style="gap:8px"><span class="chip acc">Live</span><span class="small muted">Posted ${fmtD(k.posted)} · closes ${fmtD(k.applyBy)} (${d} days)</span></div><h1 style="margin-top:6px">${esc(k.title)}</h1>
+    <p>${delivText(k)} · ${compText(k)} per creator · ${k.target.gender==='female'?'Women':'All genders'}, ${k.target.ages.map(x=>AGE_LABEL[x]).join(', ')}, ${k.target.geo==='metro'?'metros':'all India'} · min ${fol(k.minF)} followers</p></div>${sel}</div>
+  <div class="grid g4">
+    <div class="card kpi"><div class="eyebrow">Applicants</div><div class="v num">${ap.length}</div><div class="d">${ap.filter(x=>x.e.score>=80).length} strong · ${ap.filter(x=>x.e.band==='good').length} good · ${ap.filter(x=>x.e.band==='stretch').length} stretch</div></div>
+    <div class="card kpi"><div class="eyebrow">Shortlisted</div><div class="v num">${filled}/${k.slots}</div><div class="bar" style="margin-top:8px"><i style="width:${Math.min(100,Math.round(filled/k.slots*100))}%"></i></div></div>
+    <div class="card kpi"><div class="eyebrow">Suggested, not applied</div><div class="v num">${suggested.length}</div><div class="d">${S.invites.filter(i=>i.k===k.id).length} invited so far</div></div>
+    <div class="card kpi"><div class="eyebrow">Projected spend</div><div class="v num">${inrK(shortlisted.reduce((s,x)=>s+x.a.quote,0)*(1+COMMISSION))}</div><div class="d">Shortlist fees + 15% commission</div></div>
+  </div>
+  ${shortlistNow?`<div class="banner gold">${ic('star')}<div class="t"><b>${shortlistNow} shortlisted creator${shortlistNow===1?'':'s'} waiting for an offer.</b> Creators get 3 days to accept.</div><button class="btn sm" data-act="offersOpen" data-k="${k.id}">Send offers</button></div>`:''}
+  <div class="card"><div class="tabs" style="padding:0 12px">${tabs.map(([id,l,n])=>`<button class="tab ${UI.ctab===id?'on':''}" data-act="ctab" data-t="${id}">${l}<span class="cnt">${n}</span></button>`).join('')}</div>
+    ${UI.ctab==='applicants'||UI.ctab==='short'?`<div class="pad filters" style="padding-bottom:6px">${UI.ctab==='applicants'?`<div class="row wrapf" style="gap:6px">${[['all','All'],['strong','Strong 80+'],['good','Good 65–79'],['stretch','Stretch']].map(([b,l])=>`<button class="chip ${UI.band===b?'acc':'out'}" style="cursor:pointer;border:${UI.band===b?'0':''}" data-act="band" data-b="${b}">${l}</button>`).join('')}</div>`:''}
+      <select id="b-sort" class="sel" data-f="bsort" style="margin-left:auto" aria-label="Sort applicants"><option value="match" ${UI.bsort==='match'?'selected':''}>Sort: Match score</option><option value="eng" ${UI.bsort==='eng'?'selected':''}>Sort: Engagement</option><option value="quote" ${UI.bsort==='quote'?'selected':''}>Sort: Lowest quote</option></select></div>`:''}
+    ${UI.ctab==='suggested'?`<div class="pad small muted" style="padding-bottom:0">Creators who meet every requirement and score 70+, but haven't applied. Invite them; they still choose whether to apply and set their own quote.</div>`:''}
+    ${content}</div>`;
+}
+const maxER = c => Math.max(...Object.values(c.platforms).map(p=>p.er));
+function candRow(x,k){
+  const {c,e,a}=x; const main=platsOf(k)[0]; const p=c.platforms[main]||Object.values(c.platforms)[0];
+  const aud=e.parts[1];
+  let actions;
+  if(!a){ actions = invited(c.id,k.id) ? `<span class="chip acc">${ic('check').replace('<svg','<svg style="width:12px;height:12px"')}Invited</span>` : `<button class="btn sm pri" data-act="invite" data-c="${c.id}" data-k="${k.id}">Invite</button>`; }
+  else if(a.status==='applied') actions = `<button class="btn sm pri" data-act="shortlist" data-a="${a.id}">Shortlist</button><button class="iconbtn" data-act="declineOpen" data-a="${a.id}" aria-label="Decline ${esc(c.name)}" title="Decline">${ic('x')}</button>`;
+  else if(a.status==='shortlisted') actions = `${pill('shortlisted',true)}<button class="btn sm ghost" data-act="unshort" data-a="${a.id}">Undo</button>`;
+  else actions = pill(a.status,true);
+  return `<div class="li li-cand"><div class="row" style="min-width:0">${avatar(c)}<div style="min-width:0"><button class="name-btn" data-act="openC" data-c="${c.id}" data-k="${k.id}">${esc(c.name)}</button>${c.id==='cr01'&&a&&!a.seed?' <span class="chip gold" style="font-size:11px">New</span>':''}<div class="small muted">${c.city} · ${c.cats.slice(0,2).join(', ')}${a?` · quote <span class="num" style="color:var(--ink)">${inr(a.quote)}</span>`:''}</div></div></div>
+   <div class="hide-m stat"><b>${fol(p.f)} <span class="muted" style="font-weight:400">${PLAT[main]}</span></b><small>${p.er}% engagement</small></div>
+   <div class="hide-m small ink2" style="min-width:0">${esc(e.reasons[0]||aud.note)}${e.gaps.length?`<div class="muted">Weaker: ${esc(e.gaps[0])}</div>`:''}</div>
+   <div class="row" style="gap:8px">${ring(e.score,40)}</div>
+   <div class="row" style="justify-content:flex-end;gap:6px;flex-wrap:wrap">${actions}</div></div>`;
+}
+
+/* ---------- Creator profile drawer (brand) ---------- */
+function openC(cid,kid){
+  const c=creator(cid), k=campaign(kid); const a=appFor(cid,kid);
+  if(a && !a.viewed){ a.viewed=true; persist(); }
+  const e=evaluate(c,k,a?a.quote:null); const t=k.target;
+  let foot;
+  if(!a) foot = invited(cid,kid)? `<span class="small muted" style="flex:1">Invited. ${c.name.split(' ')[0]} will see your campaign at the top of their feed.</span>` : e.eligible? `<span class="small muted" style="flex:1">Hasn't applied. Inviting puts your campaign at the top of their feed.</span><button class="btn pri" data-act="invite" data-c="${cid}" data-k="${kid}">Invite to apply</button>` : `<span class="small" style="flex:1;color:var(--gold)">${esc(e.failed[0].text)}</span>`;
+  else if(a.status==='applied') foot = `<button class="btn danger" data-act="declineOpen" data-a="${a.id}">Decline</button><span style="flex:1"></span><button class="btn pri" data-act="shortlist" data-a="${a.id}">Shortlist ${c.name.split(' ')[0]}</button>`;
+  else if(a.status==='shortlisted') foot = `${pill('shortlisted',true)}<span style="flex:1"></span><button class="btn" data-act="unshort" data-a="${a.id}">Remove from shortlist</button><button class="btn pri" data-act="offersOpen" data-k="${kid}">Send offers</button>`;
+  else foot = `${pill(a.status,true)}<span class="small muted">${a.status==='declined'?esc(a.reason):''}</span>`;
+  const aud=c.aud;
+  openDrawer(`
+  <div class="dhead"><button class="iconbtn" data-act="close" aria-label="Close">${ic('x')}</button>${avatar(c,42)}<div style="flex:1;min-width:0"><h2 style="font-size:17px">${c.name}</h2><div class="small muted">${c.handle||''} · ${c.city} · ${c.cats.join(', ')}</div></div>${ring(e.score,50,!e.eligible)}</div>
+  <div class="dbody">
+    <div class="card pad sec"><div class="row between"><h3>Match for “${esc(k.title)}”</h3>${e.eligible?`<span class="band ${e.band}">${BAND_LABEL[e.band]}</span>`:''}</div>
+      <div class="breakdown">${e.parts.map(p=>`<div class="bd"><span>${p.label}</span><div class="bar ${p.pts/p.max<.6?'gold':''}"><i style="width:${Math.round(p.pts/p.max*100)}%"></i></div><span class="pts">${Math.round(p.pts)}/${p.max}</span><span class="note">${esc(p.note)}</span></div>`).join('')}</div>
+      ${e.gates.map(g=>`<div class="gate ${g.ok?'ok':'no'}">${ic(g.ok?'check':'x')}<span>${esc(g.text)}</span></div>`).join('')}
+    </div>
+    ${a?`<div class="card pad sec"><div class="row between"><h3>Application</h3><span class="small muted">Applied ${fmtD(a.applied)}</span></div><div class="row wrapf" style="gap:20px"><div class="stat"><b>${inr(a.quote)}</b><small>quote</small></div><div class="stat"><b>${inr(packageRate(c,k))}</b><small>usual rate for this package</small></div></div><p style="margin:0;white-space:pre-wrap" class="ink2">“${esc(a.pitch)}”</p>${a.link?`<div class="small" style="word-break:break-all">Sample: ${esc(a.link)}</div>`:''}</div>`:''}
+    <div class="card pad sec"><h3>Platforms</h3><div class="plat">${Object.entries(c.platforms).map(([p,v])=>`<div class="platbox"><div class="row between"><span class="small" style="font-weight:600">${PLAT[p]}</span>${c.verified[p]?'<span class="chip acc">Verified</span>':'<span class="chip gold">Self-reported</span>'}</div><div class="v num">${fol(v.f)}</div><div class="small muted">${v.er}% engagement (typical ${BENCH(v.f).toFixed(1)}%)</div></div>`).join('')}</div></div>
+    <div class="card pad sec"><div class="row between"><h3>Audience</h3><span class="small muted">Highlighted = your target</span></div>
+      <div class="aud ${t.gender!=='male'&&t.gender!=='all'?'hl':''}"><span>Women</span><div class="bar"><i style="width:${pct(aud.female)}"></i></div><span class="num">${pct(aud.female)}</span></div>
+      <div class="aud ${t.gender==='male'?'hl':''}"><span>Men</span><div class="bar"><i style="width:${pct(1-aud.female)}"></i></div><span class="num">${pct(1-aud.female)}</span></div>
+      <div class="divider"></div>
+      ${AGES.map(x=>`<div class="aud ${t.ages.includes(x)?'hl':''}"><span>${AGE_LABEL[x]}</span><div class="bar"><i style="width:${pct(aud.ages[x])}"></i></div><span class="num">${pct(aud.ages[x])}</span></div>`).join('')}
+      <div class="divider"></div>
+      <div class="aud ${t.geo==='metro'?'hl':''}"><span>Metros</span><div class="bar"><i style="width:${pct(aud.metro)}"></i></div><span class="num">${pct(aud.metro)}</span></div>
+      <div class="small muted">Top cities: ${aud.cities}</div></div>
+    <div class="card pad sec"><h3>Track record on Tessera</h3><div class="grid g2" style="gap:10px"><div class="stat"><b>${c.done}</b><small>collaborations</small></div><div class="stat"><b>${c.done?`${c.onTime} of ${c.done}`:'–'}</b><small>on time</small></div></div></div>
+  </div><div class="dfoot">${foot}</div>`);
+}
+
+/* ---------- Find creators ---------- */
+function bCreators(){
+  const ks=koraCampaigns();
+  return `<div class="pagehead"><div><h1>Find creators</h1><p>Search the creator pool. Scores are calculated against the campaign you pick.</p></div>
+    <div class="field" style="min-width:min(320px,100%)"><label for="fk">Score against</label><select id="fk" class="sel" data-f2="fk">${ks.map(k=>`<option value="${k.id}" ${UI.fk===k.id?'selected':''}>${esc(k.title)}</option>`).join('')}</select></div></div>
+  <div class="card pad"><div class="filters">
+    <label class="search">${ic('search')}<input id="fq" type="search" data-f2="fq" placeholder="Search by name, handle or city" value="${esc(UI.fq)}" aria-label="Search creators"></label>
+    <select id="fniche" class="sel" data-f2="fniche" aria-label="Niche"><option value="all">All niches</option>${CATS.map(c=>`<option ${UI.fniche===c?'selected':''}>${c}</option>`).join('')}</select>
+    <select id="fplat" class="sel" data-f2="fplat" aria-label="Platform"><option value="all">Any platform</option><option value="instagram" ${UI.fplat==='instagram'?'selected':''}>Instagram</option><option value="youtube" ${UI.fplat==='youtube'?'selected':''}>YouTube</option></select>
+    <select id="ftier" class="sel" data-f2="ftier" aria-label="Size"><option value="all">Any size</option><option value="micro" ${UI.ftier==='micro'?'selected':''}>10K–50K</option><option value="mid" ${UI.ftier==='mid'?'selected':''}>50K–100K</option><option value="macro" ${UI.ftier==='macro'?'selected':''}>100K+</option></select>
+    <select id="fer" class="sel" data-f2="fer" aria-label="Engagement"><option value="0">Any engagement</option>${[3,4,5].map(v=>`<option value="${v}" ${+UI.fer===v?'selected':''}>${v}%+ engagement</option>`).join('')}</select>
+    <select id="fcity" class="sel" data-f2="fcity" aria-label="City"><option value="all">Any city</option>${CITIES.map(c=>`<option ${UI.fcity===c?'selected':''}>${c}</option>`).join('')}</select>
+  </div></div>
+  <div id="fresults"></div>`;
+}
+function renderFindResults(){
+  const box=document.getElementById('fresults'); if(!box) return;
+  if(!UI.loaded.find){ box.innerHTML=`<div class="card">${[0,1,2,3].map(()=>`<div class="li" style="grid-template-columns:36px 1fr 60px"><div class="skel" style="width:36px;height:36px;border-radius:50%"></div><div><div class="skel" style="height:12px;width:40%"></div><div class="skel" style="height:10px;width:60%;margin-top:8px"></div></div><div class="skel" style="height:36px;border-radius:50%;width:36px"></div></div>`).join('')}</div>`; setTimeout(()=>{UI.loaded.find=true;renderFindResults();},400); return; }
+  const k=campaign(UI.fk); const q=UI.fq.trim().toLowerCase();
+  let list=creators().map(c=>({c, e:evaluate(c,k), a:appFor(c.id,k.id)})).filter(({c})=>{
+    const ig=c.platforms.instagram?c.platforms.instagram.f:0, maxF=Math.max(...Object.values(c.platforms).map(p=>p.f));
+    if(q && !`${c.name} ${c.handle} ${c.city}`.toLowerCase().includes(q)) return false;
+    if(UI.fniche!=='all' && !c.cats.includes(UI.fniche)) return false;
+    if(UI.fplat!=='all' && !c.platforms[UI.fplat]) return false;
+    if(UI.ftier==='micro' && !(maxF>=10000&&maxF<50000)) return false;
+    if(UI.ftier==='mid' && !(maxF>=50000&&maxF<100000)) return false;
+    if(UI.ftier==='macro' && maxF<100000) return false;
+    if(+UI.fer && maxER(c)<+UI.fer) return false;
+    if(UI.fcity!=='all' && c.city!==UI.fcity) return false;
+    return true;
+  }).sort((x,y)=> (y.e.eligible-x.e.eligible) || (y.e.score-x.e.score));
+  const filtersOn=q||UI.fniche!=='all'||UI.fplat!=='all'||UI.ftier!=='all'||+UI.fer||UI.fcity!=='all';
+  if(!list.length){ box.innerHTML=`<div class="card"><div class="empty"><div class="ic">${ic('users')}</div><h3>No creators match these filters</h3><p>Widen the size range or engagement filter.</p><button class="btn sm" data-act="clearF2">Clear filters</button></div></div>`; return; }
+  box.innerHTML = `<div class="resultline" style="margin-bottom:10px">${list.length} of ${creators().length} creators in the demo pool${filtersOn?' match your filters':''} · ${list.filter(x=>x.e.eligible).length} meet every requirement</div>
+  <div class="card"><div class="thead li-cand"><span>Creator</span><span class="hide-m">Reach</span><span class="hide-m">Why they match</span><span>Match</span><span></span></div><div class="list">${list.map(x=>{
+    if(x.e.eligible) return candRow({c:x.c,e:x.e,a:x.a},k);
+    const c=x.c, p=Object.values(c.platforms)[0];
+    return `<div class="li li-cand" style="opacity:.75"><div class="row" style="min-width:0">${avatar(c)}<div style="min-width:0"><button class="name-btn" data-act="openC" data-c="${c.id}" data-k="${k.id}">${esc(c.name)}</button><div class="small muted">${c.city} · ${c.cats.slice(0,2).join(', ')}</div></div></div><div class="hide-m stat"><b>${fol(p.f)}</b><small>${p.er}% engagement</small></div><div class="hide-m small" style="color:var(--gold)">${esc(x.e.failed[0].text)}</div><div>${ring(0,40,true)}</div><div class="row" style="justify-content:flex-end"><span class="chip">Not eligible</span></div></div>`;
+  }).join('')}</div></div>`;
+}
+
+/* ---------- Shortlist ---------- */
+function bShortlist(){
+  const ks=koraCampaigns();
+  const blocks=ks.map(k=>{
+    const sl=appsOn(k.id).filter(a=>['shortlisted','offer','selected'].includes(a.status)).map(a=>({a,c:creator(a.cr),e:evaluate(creator(a.cr),k,a.quote)})).sort((x,y)=>y.e.score-x.e.score);
+    const pend=sl.filter(x=>x.a.status==='shortlisted');
+    const fees=sl.reduce((s,x)=>s+x.a.quote,0);
+    return `<div class="card"><div class="pad row between wrapf"><div><h2>${esc(k.title)}</h2><div class="small muted">${sl.length} of ${k.slots} slots · fees ${inr(fees)} + 15% commission = ${inr(fees*(1+COMMISSION))}</div></div>
+      ${pend.length?`<button class="btn pri" data-act="offersOpen" data-k="${k.id}">Send ${pend.length} offer${pend.length===1?'':'s'}</button>`:''}</div>
+      <div class="pad" style="padding-top:0"><div class="bar"><i style="width:${Math.min(100,Math.round(sl.length/k.slots*100))}%"></i></div></div>
+      ${sl.length?`<div class="list">${sl.map(x=>`<div class="li" style="grid-template-columns:minmax(0,1fr) auto auto auto">${`<div class="row" style="min-width:0">${avatar(x.c)}<div style="min-width:0"><button class="name-btn" data-act="openC" data-c="${x.c.id}" data-k="${k.id}">${esc(x.c.name)}</button><div class="small muted">${x.c.city} · ${esc(x.e.reasons[0]||'')}</div></div></div>`}<span class="num hide-m">${inr(x.a.quote)}</span>${ring(x.e.score,38)}<div class="row" style="gap:6px">${pill(x.a.status,true)}${x.a.status==='shortlisted'?`<button class="btn sm ghost" data-act="unshort" data-a="${x.a.id}">Remove</button>`:''}</div></div>`).join('')}</div>`
+      :`<div class="empty"><div class="ic">${ic('star')}</div><h3>No one shortlisted yet</h3><p>Review applicants ranked by fit and shortlist up to ${k.slots}.</p><button class="btn sm" data-act="openCampaign" data-k="${k.id}">Review applicants</button></div>`}
+    </div>`;
+  }).join('');
+  return `<div class="pagehead"><div><h1>Shortlist</h1><p>Shortlisted creators get an offer at the fee they quoted. They have 3 days to accept.</p></div></div>${blocks}`;
+}
+
+/* ---------- Create campaign ---------- */
+const PRESETS = {r1:[['reel',1]], r1s3:[['reel',1],['story',3]], r2:[['reel',2]], yt1:[['video',1]], yt1r1:[['video',1],['reel',1]]};
+const PRESET_LABEL = {r1:'1 Instagram Reel', r1s3:'1 Reel + 3 Stories', r2:'2 Instagram Reels', yt1:'1 YouTube integration', yt1r1:'YouTube integration + 1 Reel'};
+let CF=null;
+function startCreate(fromDraft){
+  const d = fromDraft ? KORA_OTHERS.find(o=>o.id===fromDraft).draft : {title:'', cat:'Skincare', preset:'r1s3', min:20000, max:30000, minF:10000, gender:'female', ages:['18-24','25-34'], geo:'metro', slots:6, applyBy:'2026-11-24'};
+  CF=Object.assign({errors:{}, fromDraft, done:null}, JSON.parse(JSON.stringify(d)));
+  renderCreate();
+}
+function cfCampaign(){ return {id:'tmp', brand:'kora', title:CF.title||'Untitled', cat:CF.cat, type:'Paid', deliv:PRESETS[CF.preset], budget:[+CF.min||0,+CF.max||0], minF:+CF.minF, city:null, target:{gender:CF.gender, ages:CF.ages.length?CF.ages:['18-24'], geo:CF.geo}, slots:+CF.slots||1, posted:todayISO(), applyBy:CF.applyBy||'2026-12-31', due:'2026-12-31', status:'open'}; }
+function cfPreview(){
+  const k=cfCampaign(); const ev=creators().map(c=>({c,e:evaluate(c,k)}));
+  const elig=ev.filter(x=>x.e.eligible), strong=elig.filter(x=>x.e.score>=80);
+  const rates=strong.map(x=>packageRate(x.c,k)).sort((a,b)=>a-b);
+  const med = rates.length? rates[Math.floor((rates.length-1)/2)] : 0;
+  return {elig:elig.length, strong:strong.length, med, total:creators().length};
+}
+function renderCreate(){
+  if(CF.done){
+    const k=campaign(CF.done);
+    openModal(`<div class="mhead"><div style="flex:1"><h2>Campaign is live</h2></div><button class="iconbtn" data-act="close" aria-label="Close">${ic('x')}</button></div>
+    <div class="mbody"><div class="success"><div class="ic">${ic('check')}</div><h2>“${esc(k.title)}” is live</h2><p class="ink2" style="margin:0;max-width:440px">Creators who meet your requirements now see it in their feed, ranked by fit. Strong matches who haven't applied are waiting in Suggested; inviting them is the fastest way to fill ${k.slots} slots.</p></div></div>
+    <div class="mfoot"><button class="btn" data-act="close">Close</button><button class="btn pri" data-act="openCampaign" data-k="${k.id}" data-t="suggested">See suggested creators</button></div>`, true);
+    return;
+  }
+  const pv=cfPreview(); const E=CF.errors;
+  const warn = pv.strong && +CF.max && +CF.max < pv.med ? `<div class="banner gold" style="padding:10px 12px">${ic('alert')}<div class="t small">Your max budget (${inr(+CF.max)}) is below the median rate of your strong matches (${inr(pv.med)}). Expect fewer applications from them.</div></div>`
+    : pv.elig < +CF.slots ? `<div class="banner gold" style="padding:10px 12px">${ic('alert')}<div class="t small">Fewer eligible creators (${pv.elig}) than slots (${CF.slots}). Lower the follower minimum or widen the audience.</div></div>`
+    : `<div class="banner acc" style="padding:10px 12px">${ic('check')}<div class="t small">Healthy pool: enough strong matches to fill ${CF.slots} slots at this budget.</div></div>`;
+  openModal(`<div class="mhead"><div style="flex:1"><div class="small muted">${CF.fromDraft?'Finish draft':'New campaign'}</div><h2>Campaign brief</h2><div class="small muted">Every field here is used for matching. Structured requirements replace the free-text brief.</div></div><button class="iconbtn" data-act="close" aria-label="Close">${ic('x')}</button></div>
+  <div class="mbody"><div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px" class="cf-grid">
+    <div class="sec">
+      <div class="field"><label for="cf-title">Campaign name</label><input id="cf-title" class="input ${E.title?'bad':''}" data-cf="title" value="${esc(CF.title)}" placeholder="e.g. Ceramide Cleanser relaunch">${E.title?`<div class="err">${E.title}</div>`:''}</div>
+      <div class="fgrid">
+        <div class="field"><label for="cf-cat">Niche</label><select id="cf-cat" class="sel" data-cf="cat">${CATS.map(c=>`<option ${CF.cat===c?'selected':''}>${c}</option>`).join('')}</select></div>
+        <div class="field"><label for="cf-preset">Deliverables per creator</label><select id="cf-preset" class="sel" data-cf="preset">${Object.keys(PRESETS).map(p=>`<option value="${p}" ${CF.preset===p?'selected':''}>${PRESET_LABEL[p]}</option>`).join('')}</select></div>
+        <div class="field"><label for="cf-min">Budget per creator: min</label><div class="prefix"><span>₹</span><input id="cf-min" class="input num ${E.budget?'bad':''}" inputmode="numeric" data-cf="min" value="${CF.min}"></div></div>
+        <div class="field"><label for="cf-max">Budget per creator: max</label><div class="prefix"><span>₹</span><input id="cf-max" class="input num ${E.budget?'bad':''}" inputmode="numeric" data-cf="max" value="${CF.max}"></div></div>
+      </div>${E.budget?`<div class="err" style="color:var(--bad);font-size:12px;margin-top:-8px">${E.budget}</div>`:''}
+      <div class="fgrid">
+        <div class="field"><label for="cf-minf">Minimum followers</label><select id="cf-minf" class="sel" data-cf="minF">${[5000,10000,20000,50000,100000].map(v=>`<option value="${v}" ${+CF.minF===v?'selected':''}>${fol(v)}+</option>`).join('')}</select></div>
+        <div class="field"><label for="cf-slots">Creators needed</label><input id="cf-slots" class="input num ${E.slots?'bad':''}" inputmode="numeric" data-cf="slots" value="${CF.slots}">${E.slots?`<div class="err">${E.slots}</div>`:''}</div>
+        <div class="field"><label for="cf-gender">Audience gender</label><select id="cf-gender" class="sel" data-cf="gender"><option value="all" ${CF.gender==='all'?'selected':''}>Any</option><option value="female" ${CF.gender==='female'?'selected':''}>Mostly women</option><option value="male" ${CF.gender==='male'?'selected':''}>Mostly men</option></select></div>
+        <div class="field"><label for="cf-geo">Audience location</label><select id="cf-geo" class="sel" data-cf="geo"><option value="metro" ${CF.geo==='metro'?'selected':''}>Metro cities</option><option value="india" ${CF.geo==='india'?'selected':''}>All India</option></select></div>
+      </div>
+      <div class="field"><span class="lbl">Audience age</span><div class="checks">${AGES.map(x=>`<label class="checkchip"><input type="checkbox" data-cf="age" value="${x}" ${CF.ages.includes(x)?'checked':''}><span>${AGE_LABEL[x]}</span></label>`).join('')}</div>${E.ages?`<div class="err">${E.ages}</div>`:''}</div>
+      <div class="field"><label for="cf-date">Applications close</label><input id="cf-date" type="date" class="input ${E.applyBy?'bad':''}" data-cf="applyBy" value="${CF.applyBy}" min="2026-11-13">${E.applyBy?`<div class="err">${E.applyBy}</div>`:'<div class="hint">At least 3 days from today, so creators have time to apply.</div>'}</div>
+    </div>
+    <div class="preview" id="cf-preview">
+      <div class="eyebrow">Live marketplace preview</div>
+      <div><div class="big num">${pv.elig}</div><div class="small ink2">of ${pv.total} creators in the demo pool meet your requirements</div></div>
+      <div><div class="big num" style="color:var(--accent)">${pv.strong}</div><div class="small ink2">are strong matches (score 80+)</div></div>
+      <div><div class="big num" style="font-size:22px">${pv.med?inr(pv.med):'–'}</div><div class="small ink2">median usual rate of strong matches for ${PRESET_LABEL[CF.preset]}</div></div>
+      ${warn}
+      <div class="small muted">Updates as you edit. Same rules creators see.</div>
+    </div>
+  </div></div>
+  <div class="mfoot"><button class="btn" data-act="close">Cancel</button><button class="btn pri" data-act="cfSubmit">Publish campaign</button></div>`, true);
+}
+function validateCreate(){
+  const E={}; const min=+String(CF.min).replace(/\D/g,''), max=+String(CF.max).replace(/\D/g,''), slots=+String(CF.slots).replace(/\D/g,'');
+  if(CF.title.trim().length<6) E.title='Give the campaign a name of at least 6 characters.';
+  if(!min||!max) E.budget='Enter both a minimum and maximum budget.'; else if(max<min) E.budget='Maximum must be at least the minimum.'; else if(min<2000) E.budget='Minimum budget is ₹2,000 per creator.';
+  if(!slots||slots<1||slots>30) E.slots='Choose between 1 and 30 creators.';
+  if(!CF.ages.length) E.ages='Pick at least one age group.';
+  if(!CF.applyBy || daysTo(CF.applyBy)<3) E.applyBy='Pick a date at least 3 days from today (13 Nov or later).';
+  CF.errors=E; return !Object.keys(E).length;
+}
+function submitCreate(){
+  const id='k'+(S.seq++);
+  S.custom.push({id, brand:'kora', title:CF.title.trim(), cat:CF.cat, type:'Paid', deliv:PRESETS[CF.preset], budget:[+CF.min,+CF.max], minF:+CF.minF, city:null,
+    target:{gender:CF.gender, ages:CF.ages.slice(), geo:CF.geo}, slots:+CF.slots, posted:todayISO(), applyBy:CF.applyBy, due:addDays(CF.applyBy,18), status:'open', modeled:true,
+    brief:'New campaign created in the prototype. The full brief would be written here.', dos:[], donts:[]});
+  if(CF.fromDraft) S.drafts[CF.fromDraft]=false;
+  persist(); CF.done=id; UI.kid=id; renderCreate(); render(); toast('Campaign published. Matching creators can see it now.');
+}
+
+/* ---------- Offers ---------- */
+function offersOpen(kid){
+  const k=campaign(kid); const pend=appsOn(kid).filter(a=>a.status==='shortlisted');
+  const fees=pend.reduce((s,a)=>s+a.quote,0);
+  openModal(`<div class="mhead"><div style="flex:1"><div class="small muted">${esc(k.title)}</div><h2>Send ${pend.length} offer${pend.length===1?'':'s'}</h2></div><button class="iconbtn" data-act="close" aria-label="Close">${ic('x')}</button></div>
+  <div class="mbody"><div class="card"><div class="list">${pend.map(a=>{const c=creator(a.cr);return `<div class="li" style="grid-template-columns:1fr auto">${`<div class="row">${avatar(c,32)}<span>${c.name}</span></div>`}<span class="num">${inr(a.quote)}</span></div>`}).join('')}</div></div>
+  <dl class="kv"><dt>Creator fees</dt><dd class="num">${inr(fees)}</dd><dt>Tessera commission (15%)</dt><dd class="num">${inr(fees*COMMISSION)}</dd><dt><b>Total if all accept</b></dt><dd class="num"><b>${inr(fees*(1+COMMISSION))}</b></dd></dl>
+  <div class="small muted">You're only charged for creators who accept. Each has 3 days to respond. Funds are held by Tessera and released 7 days after you approve their content.</div></div>
+  <div class="mfoot"><button class="btn" data-act="close">Cancel</button><button class="btn pri" data-act="offersSend" data-k="${kid}">Send offers</button></div>`);
+}
+
+/* ---------- Decline ---------- */
+let DC=null;
+function declineOpen(aid){
+  const a=S.apps.find(x=>x.id===aid), c=creator(a.cr);
+  DC={aid, reason:'', err:''};
+  const draw=()=>openModal(`<div class="mhead"><div style="flex:1"><h2>Decline ${c.name}?</h2><div class="small muted">Pick a reason. ${c.name.split(' ')[0]} sees it, which helps them apply better next time.</div></div><button class="iconbtn" data-act="close" aria-label="Close">${ic('x')}</button></div>
+    <div class="mbody"><fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:8px"><legend class="sr" style="position:absolute;left:-9999px">Reason</legend>${DECLINE_REASONS.map((r,i)=>`<label class="confirm" for="dr-${i}"><input type="radio" name="dr" id="dr-${i}" data-dc="${esc(r)}" ${DC.reason===r?'checked':''}><span>${esc(r)}</span></label>`).join('')}</fieldset>${DC.err?`<div class="err" style="color:var(--bad);font-size:12px">${DC.err}</div>`:''}</div>
+    <div class="mfoot"><button class="btn" data-act="close">Cancel</button><button class="btn danger" data-act="declineConfirm">Decline applicant</button></div>`);
+  DC.draw=draw; draw();
+}
+
+/* ---------- Explainer + guide ---------- */
+function explain(){
+  openModal(`<div class="mhead"><div style="flex:1"><h2>How match scores work</h2><div class="small muted">Plain rules, no black box. Brands and creators see the same numbers.</div></div><button class="iconbtn" data-act="close" aria-label="Close">${ic('x')}</button></div>
+  <div class="mbody">
+    <div class="sec"><h3>1. Hard requirements</h3><p class="ink2" style="margin:0">If a creator misses one, they can't apply. Brands set these: platform, minimum followers on the main platform, and city for on-site work.</p></div>
+    <div class="sec"><h3>2. Score out of 100</h3>
+      <dl class="kv"><dt>Niche fit · 30</dt><dd>Primary niche 30, secondary 22, related niche 10.</dd>
+      <dt>Audience fit · 30</dt><dd>Gender 12, age 12, metro share 6. Compares the creator's audience split to the brand's target.</dd>
+      <dt>Engagement · 20</dt><dd>Engagement rate against what's typical for accounts of that size.</dd>
+      <dt>Budget fit · 15</dt><dd>Does the brand's budget cover the creator's usual rate (or their quote)?</dd>
+      <dt>Reliability · 5</dt><dd>On-time delivery on past Tessera collaborations. New creators get a neutral 4/5, so being new doesn't sink you.</dd></dl></div>
+    <div class="sec"><h3>3. Labels</h3><div class="row wrapf"><span class="band strong">80+ Strong match</span><span class="band good">65–79 Good match</span><span class="band stretch">Below 65 Stretch</span></div></div>
+    <div class="small muted">Version 1 is deliberately simple. Weights get tuned on real shortlist and completion data after launch.</div>
+  </div><div class="mfoot"><button class="btn pri" data-act="close">Got it</button></div>`);
+}
+function guide(){
+  openModal(`<div class="mhead"><div style="flex:1"><h2>Demo script (3 minutes)</h2><div class="small muted">Both sides share the same data, so actions on one side show up on the other.</div></div><button class="iconbtn" data-act="close" aria-label="Close">${ic('x')}</button></div>
+  <div class="mbody guide"><ol>
+    <li><b>Creator · Discover.</b> Filter and sort. Open the <i>Not eligible yet</i> tab to see why Velvet & Vine is locked (1.8K followers short).</li>
+    <li><b>Creator.</b> Open <i>Monsoon Barrier Serum</i>, read the match breakdown, and apply. Try submitting a short pitch to see validation.</li>
+    <li><b>Switch to Brand · Campaign.</b> Aanya now appears in <i>To review</i>, ranked by score. Open her profile, then shortlist her.</li>
+    <li><b>Brand · Suggested.</b> Invite Mira Shah or Pooja Nair: strong matches who haven't applied.</li>
+    <li><b>Brand · Shortlist.</b> Send offers. See fees + 15% commission.</li>
+    <li><b>Switch to Creator · Home.</b> Aanya sees the offer. Accept it in Applications.</li>
+    <li><b>Brand · Overview → New campaign.</b> Change budget and audience and watch the live pool estimate react.</li>
+  </ol></div><div class="mfoot"><button class="btn pri" data-act="close">Start</button></div>`);
+}
+
+const VIEWS = {'c-home':cHome, 'c-discover':cDiscover, 'c-applications':cApps, 'c-profile':cProfile, 'b-home':bHome, 'b-campaign':bCampaign, 'b-creators':bCreators, 'b-shortlist':bShortlist};
+
+/* ============ Overlay helpers ============ */
+let lastFocus=null;
+function openDrawer(html){ closeModal(); lastFocus=document.activeElement; const d=document.getElementById('drawer'); d.innerHTML=html; d.classList.add('on'); document.getElementById('scrim').classList.add('on'); const f=d.querySelector('button'); f&&f.focus(); }
+function openModal(html, wide){ const m=document.getElementById('modal'); const wasOn=m.classList.contains('on'); const scroll = wasOn && m.querySelector('.mbody') ? m.querySelector('.mbody').scrollTop : 0; if(!wasOn) lastFocus=document.activeElement; m.innerHTML=html; m.classList.toggle('wide',!!wide); m.classList.add('on'); document.getElementById('scrim').classList.add('on'); if(scroll) m.querySelector('.mbody').scrollTop=scroll; if(!wasOn){ const f=m.querySelector('input,textarea,select')||m.querySelector('.mfoot .btn.pri'); f&&f.focus(); } }
+function closeModal(){ document.getElementById('modal').classList.remove('on'); }
+function closeAll(){ closeModal(); document.getElementById('drawer').classList.remove('on'); document.getElementById('scrim').classList.remove('on'); AF=null; CF=null; DC=null; lastFocus&&lastFocus.focus&&document.body.contains(lastFocus)&&lastFocus.focus(); }
+function closeTop(){ const m=document.getElementById('modal'); if(m.classList.contains('on') && document.getElementById('drawer').classList.contains('on')){ closeModal(); AF=null; CF=null; DC=null; return; } closeAll(); }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeTop(); });
+
+/* ============ Actions ============ */
+const ACT = {
+  nav:d=>{ closeAll(); go(d.v); },
+  role:d=>{ closeAll(); S.role=d.role; persist(); go(d.role==='brand'?'b-home':'c-home'); },
+  reset:()=>{ S=fresh(); PF=null; persist(); closeAll(); Object.assign(UI,{dtab:'eligible',q:'',niche:'all',plat:'all',comp:0,ctype:'all',audfit:false,sort:'match',appsf:'all',kid:'k01',ctab:'applicants',band:'all',fq:'',fniche:'all',fplat:'all',ftier:'all',fer:0,fk:'k01',fcity:'all'}); go('c-home'); toast('Demo reset to its starting data.'); },
+  guide:()=>guide(),
+  explain:()=>explain(),
+  close:()=>closeTop(),
+  openK:d=>openK(d.k),
+  save:d=>{ S.saved[d.k]=!S.saved[d.k]; if(!S.saved[d.k]) delete S.saved[d.k]; persist(); renderDiscoverResults(); renderShell(view()); toast(S.saved[d.k]?'Saved. Find it under the Saved tab.':'Removed from saved.'); },
+  watch:d=>{ S.watch[d.k]=!S.watch[d.k]; persist(); openK(d.k); toast(S.watch[d.k]?'We\'ll notify you if you meet the requirements before applications close.':'Notification turned off.'); },
+  dtab:d=>{ UI.dtab=d.t; renderDiscoverResults(); },
+  clearF:()=>{ Object.assign(UI,{q:'',niche:'all',plat:'all',comp:0,ctype:'all',audfit:false}); render(); },
+  clearF2:()=>{ Object.assign(UI,{fq:'',fniche:'all',fplat:'all',ftier:'all',fer:0,fcity:'all'}); render(); },
+  apply:d=>{ startApply(d.k); },
+  afNext:()=>{ if(!validateApply()){ renderApply(); return; } AF.step++; renderApply(); },
+  afBack:()=>{ AF.errors={}; AF.step--; renderApply(); },
+  afSubmit:()=>submitApply(),
+  appsf:d=>{ UI.appsf=d.t; render(); },
+  withdraw:d=>{ const a=S.apps.find(x=>x.id===d.a), k=campaign(a.k);
+    openModal(`<div class="mhead"><div style="flex:1"><h2>Withdraw application?</h2><div class="small muted">${esc(k.title)} · ${BRANDS[k.brand].name}</div></div><button class="iconbtn" data-act="close" aria-label="Close">${ic('x')}</button></div><div class="mbody"><p style="margin:0" class="ink2">The brand will no longer see your application. You can apply again while applications are open (until ${fmtD(k.applyBy)}).</p></div><div class="mfoot"><button class="btn" data-act="close">Keep application</button><button class="btn danger" data-act="withdrawConfirm" data-a="${a.id}">Withdraw</button></div>`); },
+  withdrawConfirm:d=>{ const a=S.apps.find(x=>x.id===d.a); a.status='withdrawn'; persist(); closeAll(); render(); toast('Application withdrawn.'); },
+  acceptOffer:d=>{ const a=S.apps.find(x=>x.id===d.a); a.status='selected'; persist(); render(); toast(`Offer accepted. The full brief is unlocked and ${inr(a.quote)} is held for you.`); },
+  pfSave:()=>{
+    const E={}; if(PF.cats.length<1) E.cats='Pick at least one niche.';
+    Object.keys(PF.rates).forEach(t=>{ const v=+String(PF.rates[t]).replace(/\D/g,''); PF.rates[t]=v; if(me().platforms[DELIV[t].p] && (!v||v<500)) E[t]='Enter a rate of ₹500 or more.'; });
+    PF.errors=E; if(Object.keys(E).length){ render(); return; }
+    const before=creatorFeed().filter(x=>x.e.eligible&&x.e.score>=80).length;
+    S.profile={cats:PF.cats.slice(), city:PF.city, rates:Object.assign({},PF.rates), productOnly:PF.productOnly}; persist();
+    const after=creatorFeed().filter(x=>x.e.eligible&&x.e.score>=80).length; PF=null; render();
+    toast(`Profile saved. Match scores updated: ${after} strong match${after===1?'':'es'} (was ${before}).`);
+  },
+  pfReset:()=>{ PF=null; render(); toast('Changes discarded.'); },
+  connectYT:()=>{ S.ytVerified=true; persist(); PF=null; render(); toast('YouTube verified. Brands now see a verified badge on your channel.'); },
+  // brand
+  openCampaign:d=>{ closeAll(); UI.kid=d.k; UI.ctab=d.t||'applicants'; UI.band='all'; go('b-campaign'); },
+  ctab:d=>{ UI.ctab=d.t; render(); },
+  band:d=>{ UI.band=d.b; render(); },
+  openC:d=>openC(d.c,d.k),
+  shortlist:d=>{ const a=S.apps.find(x=>x.id===d.a), k=campaign(a.k); const n=appsOn(k.id).filter(x=>['shortlisted','offer','selected'].includes(x.status)).length;
+    if(n>=k.slots){ toast(`All ${k.slots} slots are taken. Remove someone first.`); return; }
+    a.status='shortlisted'; a.viewed=true; persist(); const dr=document.getElementById('drawer').classList.contains('on'); render(); if(dr) openC(a.cr,a.k); toast(`${creator(a.cr).name} shortlisted (${n+1} of ${k.slots}).`); },
+  unshort:d=>{ const a=S.apps.find(x=>x.id===d.a); a.status='applied'; persist(); const dr=document.getElementById('drawer').classList.contains('on'); render(); if(dr) openC(a.cr,a.k); toast('Moved back to To review.'); },
+  invite:d=>{ if(!invited(d.c,d.k)) S.invites.push({cr:d.c,k:d.k}); persist(); const dr=document.getElementById('drawer').classList.contains('on'); render(); if(dr) openC(d.c,d.k); toast(`${creator(d.c).name} invited. Your campaign is now pinned at the top of their feed.`); },
+  declineOpen:d=>declineOpen(d.a),
+  declineConfirm:()=>{ if(!DC.reason){ DC.err='Choose a reason so the creator gets useful feedback.'; DC.draw(); return; } const a=S.apps.find(x=>x.id===DC.aid); a.status='declined'; a.reason=DC.reason; a.viewed=true; persist(); const name=creator(a.cr).name; closeAll(); render(); toast(`${name} declined. They'll see: “${a.reason}”.`); },
+  offersOpen:d=>offersOpen(d.k),
+  offersSend:d=>{ const pend=appsOn(d.k).filter(a=>a.status==='shortlisted'); pend.forEach(a=>{a.status='offer'; a.offerOn=todayISO();}); persist(); closeAll(); render(); toast(`${pend.length} offer${pend.length===1?'':'s'} sent. Creators have 3 days to accept.`); },
+  newCampaign:()=>startCreate(null),
+  draftCampaign:d=>startCreate(d.k),
+  cfSubmit:()=>{ if(!validateCreate()){ renderCreate(); return; } submitCreate(); }
+};
+document.addEventListener('click', e=>{
+  const t=e.target.closest('[data-act]'); if(!t) return;
+  const fn=ACT[t.dataset.act]; if(fn){ e.preventDefault(); fn(t.dataset, t, e); }
+});
+
+/* ============ Inputs ============ */
+document.addEventListener('input', e=>{
+  const t=e.target;
+  if(t.dataset.f){ const k=t.dataset.f; UI[k]= t.type==='checkbox'? t.checked : t.value;
+    if(k==='kid'){ render(); return; }
+    if(k==='bsort'){ render(); return; }
+    renderDiscoverResults(); return; }
+  if(t.dataset.f2){ UI[t.dataset.f2]=t.value; if(t.dataset.f2==='fk'){ render(); return; } renderFindResults(); return; }
+  if(t.dataset.af && AF){ const k=t.dataset.af; AF[k]= t.type==='checkbox'? t.checked : t.value;
+    if(k==='pitch'){ const c=document.getElementById('ap-count'); if(c) c.textContent=t.value.trim().length+'/600'; }
+    if(t.type==='checkbox' && AF.errors[k]){ delete AF.errors[k]; renderApply(); }
+    return; }
+  if(t.dataset.cf && CF){ const k=t.dataset.cf;
+    if(k==='age'){ CF.ages = t.checked ? [...new Set([...CF.ages,t.value])] : CF.ages.filter(x=>x!==t.value); CF.ages.sort((a,b)=>AGES.indexOf(a)-AGES.indexOf(b)); }
+    else CF[k]=t.value;
+    const pos = t.selectionStart; const id=t.id;
+    renderCreate();
+    const n=document.getElementById(id); if(n){ n.focus(); try{ if(pos!=null && n.setSelectionRange && n.type!=='date') n.setSelectionRange(pos,pos);}catch(_){} }
+    return; }
+  if(t.dataset.pf && PF){ const k=t.dataset.pf;
+    if(k==='cat'){ if(t.checked){ if(PF.cats.length>=3){ t.checked=false; toast('Pick up to 3 niches. Remove one first.'); return; } PF.cats.push(t.value);} else PF.cats=PF.cats.filter(x=>x!==t.value); render(); return; }
+    if(k==='rate') PF.rates[t.dataset.t]=t.value;
+    if(k==='city') PF.city=t.value;
+    if(k==='po') PF.productOnly=t.checked;
+    return; }
+  if(t.dataset.dc!==undefined && DC){ DC.reason=t.dataset.dc; DC.err=''; }
+});
+document.addEventListener('change', e=>{ const t=e.target; if(t.tagName==='SELECT' && (t.dataset.f||t.dataset.f2)){ /* handled by input */ } });
+
+render();
+</script>
+<style>
+@media (max-width:760px){ .cf-grid{grid-template-columns:1fr!important} }
+</style>
+</body>
+</html>

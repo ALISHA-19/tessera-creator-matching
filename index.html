@@ -1,0 +1,1108 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Tessera Matching Case Study</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: same form as the WIN Connect page. Sticky pill nav on top, full-width bands alternating dark (.dk) and light, one butter "statement" band, mono eyebrows over big headings. "Tessera" = mosaic tile, so each section owns a tile colour. */
+:root{
+  /* WIN Connect system: one gold accent, charcoal dark bands, cream light bands. Bands are fixed light/dark by design, as on the reference page. */
+  --paper:#F5F4EF; --surface:#FFFFFF; --surface-2:#EDEBE4; --line:#E1DED5; --line-strong:#C4BFB1;
+  --ink:#15181D; --ink-2:#2B3037; --ink-3:#4E545C;
+  --violet:#9A5F0C; --violet-soft:#F6E7C8; --violet-strong:#7A4A06; --on-violet:#FFFFFF;
+  --butter:#E3A93B; --butter-soft:#F6E7C8; --butter-strong:#9A5F0C;
+  --tomato:#C53030; --tomato-soft:#FBE7E5; --tomato-strong:#C53030;
+  --mint:#1F7A5C; --mint-soft:#DDF1E8; --mint-strong:#1F7A5C;
+  --hero:#15181D; --hero-ink:#F5F4EF; --hero-2:#8C929B; --hero-line:#2E343D; --hero-tile:#1F242B;
+  --nav:rgba(21,24,29,.92);
+  --shadow:0 1px 2px rgba(21,24,29,.04),0 8px 24px rgba(21,24,29,.06);
+  --shadow-hi:0 2px 4px rgba(21,24,29,.06),0 22px 50px rgba(21,24,29,.14);
+  --f-display:"Fraunces",Georgia,serif;
+  --f-serif:"Fraunces",Georgia,serif;
+  --f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){ --paper:#EFEDE6; --surface:#FBFAF6; color-scheme:light dark; }}
+:root[data-theme="dark"]{ --paper:#EFEDE6; --surface:#FBFAF6; color-scheme:light dark; }
+/* dark band */
+.dk{
+  --paper:#15181D; --surface:#1F242B; --surface-2:#1B1F25; --line:#2E343D; --line-strong:#4A5360;
+  --ink:#F5F4EF; --ink-2:#DDE0E4; --ink-3:#B3B8C0;
+  --violet:#E3A93B; --violet-soft:#2E2A20; --violet-strong:#F2C46B; --on-violet:#15181D;
+  --butter:#E3A93B; --butter-soft:#2E2A20; --butter-strong:#E3A93B;
+  --tomato:#F28B82; --tomato-soft:#352426; --tomato-strong:#F28B82;
+  --mint:#6FD3A8; --mint-soft:#1E3530; --mint-strong:#6FD3A8;
+  --shadow:none; --shadow-hi:0 22px 50px -24px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{background:#15181D;color:var(--ink);font:17px/1.6 var(--f-body);margin:0;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:41;background:#15181D}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;letter-spacing:-.5px;text-wrap:balance;margin:0}
+p{margin:0}
+a{color:var(--violet)}
+:focus-visible{outline:2px solid var(--violet);outline-offset:3px}
+.num,td,th{font-variant-numeric:tabular-nums}
+.serif{font-family:var(--f-serif);font-style:italic;font-weight:500;letter-spacing:-.01em}
+.wrap{max-width:1160px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* NAV */
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--nav);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #2E343D}
+nav.top .wrap{display:flex;align-items:center;gap:18px;padding-block:12px}
+.logo{display:flex;align-items:center;gap:10px;font:800 15px var(--f-body);letter-spacing:.1em;color:#F5F4EF;text-decoration:none;white-space:nowrap}
+.logo b{color:#E3A93B}
+.tiles{display:grid;grid-template-columns:repeat(2,9px);gap:2px}
+.tiles i{width:9px;height:9px;border-radius:2px}
+.tiles i:nth-child(1){background:#E3A93B}.tiles i:nth-child(2){background:#E3A93B}.tiles i:nth-child(3){background:#6FD3A8}.tiles i:nth-child(4){background:#E3A93B}
+.links{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;margin-left:auto}
+.nv{position:relative}
+.pill{display:block;text-decoration:none;padding:6px 12px;border-radius:99px;border:1px solid #4A5360;color:#D9DCE1;font-size:13px;font-weight:500;white-space:nowrap;transition:background .25s,color .25s,border-color .25s}
+.nv:hover>.pill,.pill:focus-visible{border-color:#E3A93B;color:#fff}
+.pill.on{background:#E3A93B;border-color:#E3A93B;color:#15181D;font-weight:600}
+.dd{position:absolute;top:100%;left:50%;margin-top:10px;transform:translate(-50%,6px);min-width:236px;background:#1F242B;border:1px solid #2E343D;border-radius:14px;padding:8px;box-shadow:0 24px 50px -18px rgba(0,0,0,.65);display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .2s,transform .2s,visibility .2s;z-index:50}
+.dd::before{content:"";position:absolute;left:0;right:0;top:-12px;height:12px}
+.nv:hover .dd,.nv:focus-within .dd{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.nv.start .dd{left:0;transform:translateY(6px)}.nv.start:hover .dd,.nv.start:focus-within .dd{transform:none}
+.nv.end .dd{left:auto;right:0;transform:translateY(6px)}.nv.end:hover .dd,.nv.end:focus-within .dd{transform:none}
+.ddh{font:600 10.5px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:#E3A93B;padding:6px 10px 8px}
+.dd a{display:flex;gap:10px;align-items:baseline;text-decoration:none;color:#D9DCE1;font-size:13.5px;line-height:1.35;padding:8px 10px;border-radius:8px;transition:background .15s,color .15s}
+.dd a i{font:normal 600 10.5px var(--f-mono);color:#8C929B;min-width:18px}
+.dd a:hover,.dd a:focus-visible{background:#2E343D;color:#fff}
+.dd a:hover i{color:#E3A93B}
+.menu{display:none;margin-left:auto;align-items:center;gap:8px;background:none;border:1px solid #4A5360;color:#F5F4EF;border-radius:99px;padding:7px 14px;font:600 13px var(--f-body);cursor:pointer}
+.menu svg{width:12px;height:12px;transition:transform .25s}
+nav.open .menu{background:#E3A93B;border-color:#E3A93B;color:#15181D}
+nav.open .menu svg{transform:rotate(180deg)}
+@media (max-width:1180px){.logo .full{display:none}}
+@media (max-width:980px){
+  .menu{display:inline-flex}
+  .links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;flex-wrap:nowrap;gap:0;margin:0;background:#15181D;border-bottom:1px solid #2E343D;padding:6px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));max-height:calc(100dvh - 64px);overflow-y:auto;box-shadow:0 30px 60px -20px rgba(0,0,0,.6)}
+  nav.open .links{display:flex}
+  .nv{border-bottom:1px solid #2E343D;padding:10px 0}
+  .pill{border:0;padding:4px 0;font:600 18px var(--f-display);color:#F5F4EF}
+  .pill.on{background:none;color:#E3A93B}
+  .dd{position:static;opacity:1;visibility:visible;transform:none!important;min-width:0;margin:4px 0 0;background:none;border:0;box-shadow:none;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px}
+  .dd::before,.ddh{display:none}
+  .dd a{padding:7px 8px;font-size:13px}
+}
+@media (max-width:480px){.dd{grid-template-columns:1fr}}
+.progress{position:absolute;left:0;bottom:-1px;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:#E3A93B}
+
+/* BANDS */
+section.band{background:var(--paper);color:var(--ink);padding-block:88px;border-top:1px solid var(--line);scroll-margin-top:60px}
+section.band > .wrap{display:flex;flex-direction:column;gap:22px}
+.head{display:flex;flex-direction:column;gap:16px;margin-bottom:22px}
+.eyebrow{font:600 12px var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--cs,var(--violet));display:flex;align-items:center;gap:12px}
+.eyebrow i{width:28px;height:1px;background:var(--cs,var(--violet));opacity:.8;flex:none;transition:width .6s cubic-bezier(.2,.7,.2,1)}
+.head:hover .eyebrow i{width:52px}
+.head h2{font-size:clamp(32px,4.6vw,56px);font-weight:600;line-height:1.04;max-width:22ch}
+.head h2 .serif{color:var(--cs,var(--violet));font-size:1em}
+.lede{color:var(--ink-2);max-width:66ch;font-size:18px}
+h3{font-size:22px;font-weight:700;margin-top:18px}
+.prose{display:flex;flex-direction:column;gap:12px;color:var(--ink-2)}
+.prose b{color:var(--ink)}
+ul.clean{margin:0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:8px;color:var(--ink-2)}
+ul.clean li{position:relative;padding-left:20px}
+ul.clean li::before{content:"";position:absolute;left:0;top:.62em;width:8px;height:8px;border-radius:2px;background:var(--dot,var(--violet));transform:rotate(45deg)}
+ul.clean b{color:var(--ink)}
+.muted{color:var(--ink-3)} .small{font-size:13.5px}
+.label{font:600 11px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.A{display:inline-block;font:700 10px var(--f-mono);color:var(--butter-strong);background:var(--butter-soft);border-radius:5px;padding:0 5px;margin-left:3px;vertical-align:1px}
+
+/* colours per section */
+.c-tomato,.c-violet,.c-mint,.c-butter{--c:var(--butter);--cs:var(--violet);--soft:var(--butter-soft);--dot:var(--butter);--cink:#15181D}
+
+/* HERO */
+.hero{border-top:0!important;padding-block:72px 64px!important;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:48px;align-items:center}
+.hero-left{display:flex;flex-direction:column;gap:24px;min-width:0}
+.hero h1{font-size:clamp(38px,5.8vw,74px);line-height:.98;font-weight:600}
+.hero h1 .serif{font-size:1em;color:var(--butter)}
+.hero h1 .hl{background:linear-gradient(transparent 64%,rgba(227,169,59,.38) 64%,rgba(227,169,59,.38) 94%,transparent 94%);padding:0 .06em}
+.word{display:inline-block;animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
+@keyframes rise{from{transform:translateY(.45em);opacity:.0001}to{transform:none;opacity:1}}
+.meta{display:flex;flex-wrap:wrap;gap:10px}
+.chip{font:500 12px var(--f-mono);padding:6px 12px;border:1px solid var(--line-strong);border-radius:99px;color:var(--ink-2)}
+.chip.hot{border-color:var(--butter);color:var(--butter)}
+.hero .lede b{color:var(--ink);font-weight:600}
+.cta{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:12px;font-weight:700;font-size:14px;text-decoration:none;border:1.5px solid transparent;transition:transform .2s,box-shadow .2s,background .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn.pri{background:#E3A93B;color:#15181D;box-shadow:0 8px 24px rgba(227,169,59,.25)}
+.btn.sec{border-color:var(--line-strong);color:var(--ink)}
+.btn.sec:hover{background:var(--surface)}
+.hero .note{font-size:12.5px;color:var(--ink-3)}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:56px}
+.fact{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px;min-width:0;border-top:4px solid var(--c);transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+.fact:hover{transform:translateY(-4px);box-shadow:var(--shadow-hi)}
+.fact b{font:600 30px/1.05 var(--f-display);color:var(--c);letter-spacing:-.02em}
+.fact span{font-size:14px;color:var(--ink-2);line-height:1.45}
+.fact .k{font:600 10.5px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+
+/* mosaic */
+.mosaic-wrap{position:relative;aspect-ratio:1/1;max-width:480px;width:100%;justify-self:end}
+.mosaic{position:absolute;inset:0;display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.tile{border-radius:12px;background:var(--hero-tile);display:grid;place-items:center;font:700 12px var(--f-display);color:var(--hero-2);transition:background .6s,color .6s,transform .6s cubic-bezier(.2,.7,.2,1),box-shadow .6s,opacity .6s;position:relative}
+.tile.c{background:var(--hero-line)}
+.tile.on-tomato{background:#E3A93B;color:#15181D}
+.tile.on-butter{background:#F5F4EF;color:#15181D}
+.tile.on-mint{background:#23684F;color:#F5F4EF}
+.tile.on-violet{background:#4A5360;color:#F5F4EF}
+.tile.pop{transform:scale(1.08);box-shadow:0 10px 30px rgba(0,0,0,.35);z-index:2}
+.tile.dim{opacity:.35}
+.match-card{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);background:#FFFFFF;color:#15181D;border-radius:18px;padding:14px 18px;display:flex;align-items:center;gap:14px;box-shadow:0 24px 60px rgba(0,0,0,.45);min-width:290px;z-index:5}
+.match-card .who{font-weight:700;font-size:14px;line-height:1.3}
+.match-card .why{font-size:12.5px;color:#535961}
+.ring{position:relative;width:58px;height:58px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:6}
+.ring .bg{stroke:#EDEBE4}
+.ring .fg{stroke:#C88F25;stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(.2,.7,.2,1),stroke .4s}
+.ring span{position:absolute;inset:0;display:grid;place-items:center;font:600 17px var(--f-display)}
+
+/* ticker */
+.ticker{background:#E3A93B;color:#15181D;overflow:hidden;border-block:1.5px solid #15181D}
+.ticker .track{display:flex;width:max-content;animation:marq 38s linear infinite}
+.ticker span{padding:12px 22px;font:700 14px var(--f-display);white-space:nowrap;display:flex;align-items:center;gap:22px}
+.ticker span::after{content:"";width:9px;height:9px;border-radius:2px;background:#15181D;transform:rotate(45deg)}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+/* statement band */
+section.statement{background:#E3A93B;color:#15181D;border-top:0;padding-block:96px;position:relative;overflow:hidden}
+.statement .eyebrow{color:#15181D}.statement .eyebrow i{background:#15181D}
+.statement h2{font:600 clamp(32px,5vw,64px)/1.04 var(--f-display);letter-spacing:-.025em;max-width:20ch}
+.statement h2 .serif{color:#15181D}
+.statement .lede{color:#3B2F14;font-size:20px;max-width:58ch}
+.statement .deco{position:absolute;right:-40px;top:50%;transform:translateY(-50%);display:grid;grid-template-columns:repeat(3,64px);gap:10px;opacity:.9}
+.statement .deco i{width:64px;height:64px;border-radius:14px;background:#15181D;opacity:.08;animation:blink 4.8s ease-in-out infinite}
+.statement .deco i:nth-child(2n){animation-delay:.8s}.statement .deco i:nth-child(3n){animation-delay:1.6s;background:#15181D;opacity:.18}
+@keyframes blink{50%{transform:scale(.82) rotate(8deg)}}
+
+/* cards */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:var(--shadow);transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s,border-color .35s}
+.card.lift:hover{transform:translateY(-4px);box-shadow:var(--shadow-hi);border-color:var(--line-strong)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.callout{position:relative;background:var(--soft,var(--violet-soft));padding:18px 22px 18px 58px;border-radius:18px;color:var(--ink)}
+.callout::before{content:"";position:absolute;left:22px;top:22px;width:16px;height:16px;border-radius:4px;background:var(--c,var(--violet));transform:rotate(45deg)}
+.tag{display:inline-block;font:600 11px var(--f-mono);padding:3px 10px;border-radius:99px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.tag.violet{background:var(--violet);color:var(--on-violet)} .tag.mint{background:var(--mint-soft);color:var(--mint-strong)} .tag.tomato{background:var(--tomato-soft);color:var(--tomato-strong)} .tag.butter{background:var(--butter-soft);color:var(--butter-strong)}
+.kv{display:grid;grid-template-columns:170px 1fr;gap:10px 18px;font-size:14.5px;margin:0}
+.kv dt{color:var(--ink-3);font-weight:600}
+.kv dd{margin:0;color:var(--ink-2)} .kv dd b{color:var(--ink)}
+.quote{font-family:var(--f-serif);font-style:italic;font-size:22px;line-height:1.3;color:var(--ink)}
+.hl-card{background:linear-gradient(160deg,#23684F,#1A5240);color:#F5F4EF;border:0;box-shadow:0 24px 60px -28px rgba(35,104,79,.7)}
+.hl-card .label{color:#E3A93B}
+.hl-card p,.hl-card li{color:#D6E7DF}
+.hl-card b{color:#fff}
+
+/* summary steps (journey form) */
+.steps3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;counter-reset:j}
+.stepc{counter-increment:j;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px 20px;display:flex;flex-direction:column;gap:10px;border-top:5px solid var(--c);box-shadow:var(--shadow);transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+.stepc:hover{transform:translateY(-4px);box-shadow:var(--shadow-hi)}
+.stepc .k{font:600 11px var(--f-mono);letter-spacing:.1em;color:var(--cs)}
+.stepc .k::before{content:"0" counter(j) " · "}
+.stepc p{font-size:14.5px;color:var(--ink-2)}
+.stepc b{color:var(--ink)}
+.badge{font:600 11px var(--f-mono);letter-spacing:.04em;padding:4px 10px;border-radius:99px;align-self:flex-start;background:var(--soft);color:var(--cs)}
+
+/* want/fear grid */
+.wants{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.want{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+.want:hover{transform:translateY(-4px) rotate(-.4deg);box-shadow:var(--shadow-hi)}
+.want .ic{width:38px;height:38px;border-radius:11px;background:var(--c);display:grid;place-items:center;color:var(--cink,#fff)}
+.want .ic svg{width:20px;height:20px}
+.want h4{font:700 16px var(--f-display);margin:0}
+.want p{font-size:13.5px;color:var(--ink-2)}
+.want .fear{font-size:12.5px;color:var(--tomato-strong);font-weight:600}
+.want .fear::before{content:"Fear: ";color:var(--ink-3);font-weight:500}
+
+/* problem cards */
+.prob{display:grid;grid-template-columns:96px minmax(0,1fr);gap:22px;align-items:start}
+.prob .pn{width:96px;height:96px;border-radius:24px;background:var(--c);color:var(--cink,#fff);display:grid;place-items:center;font:600 34px var(--f-display);transform:rotate(-3deg);transition:transform .4s}
+.prob:hover .pn{transform:rotate(3deg) scale(1.04)}
+.prob h3{margin:0 0 12px}
+
+/* tables */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th{text-align:left;font:600 11px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);padding:13px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:13px 16px;border-top:1px solid var(--line);vertical-align:top;color:var(--ink);font-weight:500}
+tr:first-child td{border-top:0}
+tbody tr{transition:background .2s}
+tbody tr:hover td{background:var(--surface-2)}
+td b{color:var(--ink)}
+tr.win td{background:var(--violet-soft)}
+tr.win:hover td{background:var(--violet-soft)}
+tr.win td:first-child{box-shadow:inset 4px 0 0 var(--violet)}
+.r{text-align:right}
+.score{font-weight:600;color:var(--ink)}
+.minw-720 table{min-width:720px} .minw-900 table{min-width:900px}
+.pbar{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+.pbar i{display:block;height:8px;border-radius:99px;background:var(--violet);width:calc(var(--v) * 22px);transition:width 1s cubic-bezier(.2,.7,.2,1)}
+
+/* diagrams */
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;overflow-x:auto;margin:0;box-shadow:var(--shadow)}
+.fig svg{display:block;width:100%;min-width:720px;height:auto}
+.d-box{fill:var(--surface-2);stroke:var(--line-strong)}
+.d-v{fill:var(--violet-soft);stroke:var(--violet)}
+.d-b{fill:var(--butter-soft);stroke:var(--butter)}
+.d-r{fill:var(--tomato-soft);stroke:var(--tomato)}
+.d-t{fill:var(--ink);font:700 13px var(--f-body)}
+.d-s{fill:var(--ink-2);font:500 11.5px var(--f-body)}
+.d-l{fill:var(--ink-3);font:600 10.5px var(--f-mono);letter-spacing:.1em}
+.d-arrow{stroke:var(--ink-3);stroke-width:1.5;fill:none}
+.flow{stroke:var(--violet);stroke-width:2;fill:none;stroke-dasharray:6 6;animation:dash 1.1s linear infinite}
+.flow.slow{stroke:var(--ink-3);stroke-width:1.5;animation-duration:2.2s}
+@keyframes dash{to{stroke-dashoffset:-24}}
+.pulse{fill:var(--tomato);transform-box:fill-box;transform-origin:center;animation:pulse 1.8s ease-out infinite}
+.pulse.b{fill:var(--butter)}
+@keyframes pulse{0%{transform:scale(1);opacity:.55}100%{transform:scale(2.6);opacity:0}}
+.d-dot{fill:var(--tomato)} .d-dot.b{fill:var(--butter)}
+.d-dot-t{fill:#FFFFFF;font:600 10px var(--f-body)} .d-dot-t.k{fill:#15181D}
+.flowlbl{fill:var(--violet);font:700 11.5px var(--f-body)}
+
+/* feature list */
+.feats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.feat{display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;align-items:start}
+.feat .n{width:52px;height:52px;border-radius:15px;background:var(--soft);color:var(--cs);display:grid;place-items:center;font:600 20px var(--f-display);transition:background .3s,color .3s,transform .3s}
+.feat:hover .n{background:var(--c);color:var(--cink,#fff);transform:rotate(-6deg)}
+.feat h4{font:700 17px var(--f-display);margin:0 0 6px}
+.feat p{font-size:14px;color:var(--ink-2)}
+.feat .out{margin-top:10px;font-size:13px;font-weight:600;color:var(--mint-strong);display:flex;gap:8px;align-items:flex-start}
+.feat .out::before{content:"→";font-weight:600}
+
+/* playground */
+.play{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border-radius:24px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow-hi);background:var(--surface)}
+.play .controls{padding:26px;display:flex;flex-direction:column;gap:18px}
+.play .out{background:#15181D;color:#F5F4EF;padding:26px;display:flex;flex-direction:column;gap:18px;position:relative;overflow:hidden}
+.play .out::after{content:"";position:absolute;right:-60px;top:-60px;width:200px;height:200px;border-radius:40px;background:#E3A93B;opacity:.1;transform:rotate(18deg)}
+.ctl{display:flex;flex-direction:column;gap:8px}
+.ctl label{display:flex;justify-content:space-between;font-weight:600;font-size:14px}
+.ctl label output{color:var(--violet);font-variant-numeric:tabular-nums}
+.ctl input[type=range]{width:100%;accent-color:var(--violet)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{border:1.5px solid var(--line-strong);background:var(--surface);color:var(--ink-2);padding:7px 12px;border-radius:99px;font:600 13px var(--f-body);cursor:pointer;transition:all .2s}
+.seg button:hover{border-color:var(--violet)}
+.seg button.on{background:var(--violet);border-color:var(--violet);color:var(--on-violet)}
+.bigring{width:150px;height:150px;position:relative;align-self:center;z-index:1}
+.bigring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.bigring circle{fill:none;stroke-width:12}
+.bigring .bg{stroke:#2E343D}
+.bigring .fg{stroke-linecap:round;transition:stroke-dashoffset .7s cubic-bezier(.2,.7,.2,1),stroke .4s}
+.bigring span{position:absolute;inset:0;display:grid;place-items:center;font:600 46px var(--f-display);letter-spacing:-.03em}
+.verdict{text-align:center;z-index:1}
+.verdict b{font:600 20px var(--f-display);display:block}
+.verdict small{color:#B6BBC3;font-size:13px}
+.bd{display:grid;grid-template-columns:96px 1fr 44px;gap:10px;align-items:center;font-size:13px;z-index:1}
+.bd .tr{height:8px;border-radius:99px;background:#2E343D;overflow:hidden}
+.bd .tr i{display:block;height:100%;border-radius:99px;background:#6FD3A8;transition:width .6s cubic-bezier(.2,.7,.2,1),background .3s}
+.bd .tr i.weak{background:#F2C46B}
+.bd span:last-child{text-align:right;color:#B6BBC3;font-variant-numeric:tabular-nums}
+.say{font-size:13.5px;color:#F5F4EF;background:#1F242B;border-radius:12px;padding:12px 14px;z-index:1;line-height:1.5}
+
+/* stats */
+.stat{display:flex;flex-direction:column;gap:6px}
+.stat .v{font:600 34px var(--f-display);letter-spacing:-.03em;line-height:1}
+.stat .v .to{color:var(--c)}
+.stat .d{font-size:13px;color:var(--ink-2)}
+.stats .card{border-bottom:6px solid var(--c)}
+
+/* metrics before/after */
+.mets{display:flex;flex-direction:column;gap:14px}
+.met{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1.6fr);gap:22px;align-items:center}
+.met h4{font:700 17px var(--f-display);margin:0}
+.met p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+.bars{display:flex;flex-direction:column;gap:7px}
+.brow{display:grid;grid-template-columns:52px 1fr 70px;gap:10px;align-items:center;font-size:12.5px;color:var(--ink-3)}
+.brow .tr{height:14px;border-radius:6px;background:var(--surface-2);overflow:hidden}
+.brow .tr i{display:block;height:100%;border-radius:6px;width:var(--w);transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+.brow.b i{background:var(--line-strong)}
+.brow.t i{background:var(--c)}
+.brow b{color:var(--ink);font-variant-numeric:tabular-nums;text-align:right}
+.met .tag{margin-left:6px}
+
+.ask{display:inline-block;font:700 10px var(--f-mono);color:var(--on-violet);background:var(--violet);border-radius:6px;padding:2px 7px;margin-right:6px;vertical-align:1px;letter-spacing:.06em}
+
+/* timeline */
+.tl{position:relative;display:flex;flex-direction:column;gap:14px;padding-left:34px}
+.tl::before{content:"";position:absolute;left:11px;top:6px;bottom:6px;width:3px;border-radius:3px;background:var(--butter)}
+.tl .st{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 18px;display:grid;grid-template-columns:110px 1fr;gap:6px 16px;box-shadow:var(--shadow)}
+.tl .st::before{content:"";position:absolute;left:-31px;top:18px;width:16px;height:16px;border-radius:5px;background:var(--c);transform:rotate(45deg);box-shadow:0 0 0 4px var(--paper)}
+.tl .st b{font-family:var(--f-display)}
+.tl .st .dp{grid-column:2;font-size:13px;color:var(--ink-3)}
+
+/* embed */
+.embed{border:1px solid var(--line-strong);border-radius:22px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow-hi)}
+.embed .bar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink-3);flex-wrap:wrap}
+.embed .dots{display:flex;gap:6px}.embed .dots i{width:11px;height:11px;border-radius:50%}
+.embed .dots i:nth-child(1){background:#E3A93B}.embed .dots i:nth-child(2){background:#E3A93B}.embed .dots i:nth-child(3){background:#6FD3A8}
+.embed iframe{display:block;width:100%;height:860px;border:0;background:var(--paper)}
+.steps{counter-reset:s;list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px}
+.steps li{counter-increment:s;display:flex;gap:12px;font-size:14px;color:var(--ink-2)}
+.steps li::before{content:counter(s);flex:none;width:26px;height:26px;border-radius:8px;background:#E3A93B;color:#15181D;font-weight:600;font-size:13px;display:grid;place-items:center}
+.steps b{color:var(--ink)}
+footer{background:#15181D;color:#8C929B;padding-block:30px;font-size:13px;border-top:1px solid #2E343D}
+
+/* reveal: only applied by JS to elements below the first screen */
+.pre{opacity:0;transform:translateY(28px)}
+.rv{transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+
+@media (max-width:1000px){.facts{grid-template-columns:1fr 1fr}.statement .deco{display:none}}
+@media (max-width:900px){.hero-grid{grid-template-columns:1fr}.mosaic-wrap{justify-self:center;max-width:420px;margin-bottom:24px}.wants{grid-template-columns:1fr 1fr}.play{grid-template-columns:1fr}.steps3{grid-template-columns:1fr}}
+@media (max-width:760px){
+  section.band{padding-block:64px}
+  .g2,.g3,.g4,.feats,.wants{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .kv{grid-template-columns:1fr}.kv dt{margin-top:6px}
+  .prob{grid-template-columns:1fr}.prob .pn{width:64px;height:64px;font-size:24px;border-radius:18px}
+  .met{grid-template-columns:1fr}
+  .tl .st{grid-template-columns:1fr}.tl .st .dp{grid-column:1}
+  .embed iframe{height:720px}
+  .match-card{min-width:0;width:calc(100% - 20px)}
+  .logo .full{display:none}
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .pre{opacity:1;transform:none}
+}
+
+/* v7: evaluation revisions */
+.A{display:inline-block;font:700 9.5px/1 var(--f-mono);letter-spacing:.04em;padding:2px 4px;border-radius:4px;border:1px solid currentColor;color:var(--ink-3);vertical-align:2px;margin-left:1px;opacity:.9}
+.principle{background:linear-gradient(160deg,#23684F,#1A5240);color:#D6E7DF;border-radius:20px;padding:30px;display:flex;flex-direction:column;gap:14px;box-shadow:0 24px 60px -28px rgba(35,104,79,.7)}
+.principle .eyebrow{color:#E3A93B}.principle .eyebrow i{background:#E3A93B}
+.principle .big{font:600 clamp(22px,2.4vw,30px)/1.2 var(--f-display);color:#fff;letter-spacing:-.01em;margin:0}
+.principle p{margin:0;font-size:15px;line-height:1.55}
+.mh{font:600 19px/1.25 var(--f-display);margin:6px 0 8px;color:var(--ink)}
+.ac{font-size:14px;line-height:1.7;color:var(--ink-2);margin-top:8px}.ac b{color:var(--ink);font-family:var(--f-mono);font-size:12px;letter-spacing:.04em}
+.states{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
+.st-c{font:600 12px var(--f-mono);padding:5px 10px;border-radius:8px;background:var(--surface-2);color:var(--ink)}
+.st-c.ok{background:var(--mint-soft);color:var(--mint-strong)}
+.states .ar{color:var(--ink-3)}
+th.r,td.r{text-align:right}
+.grid+.grid,.grid+h3,.tw+.grid,.grid+.callout,.tw+.callout{margin-top:16px}
+.tl .st{grid-template-columns:120px 1fr}
+@media (max-width:900px){.principle{padding:24px}}
+tr.nt-c td:first-child{box-shadow:inset 4px 0 0 var(--tomato)}tr.nt-b td:first-child{box-shadow:inset 4px 0 0 var(--mint)}tr.nt-x td:first-child{box-shadow:inset 4px 0 0 var(--violet)}tr.nt-c{background:color-mix(in srgb,var(--tomato-soft) 45%,transparent)}tr.nt-b{background:color-mix(in srgb,var(--mint-soft) 60%,transparent)}tr.nt-x{background:color-mix(in srgb,var(--violet-soft) 60%,transparent)}
+
+/* goals / non-goals */
+.gng{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.gcard{position:relative;border-radius:22px;padding:30px 30px 26px;overflow:hidden;isolation:isolate;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+.gcard:hover{transform:translateY(-4px)}
+.gcard::after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:-90px;top:-110px;z-index:-1;opacity:.35;animation:gfloat 9s ease-in-out infinite}
+.gcard.yes{background:linear-gradient(150deg,#2A7A5C,#174A39);color:#E3F2EA;box-shadow:0 26px 60px -30px rgba(23,74,57,.9)}
+.gcard.yes::after{background:radial-gradient(circle,#6FD3A8,transparent 70%)}
+.gcard.no{background:linear-gradient(150deg,#262B33,#15181D);color:#C9CDD3;box-shadow:0 26px 60px -30px rgba(0,0,0,.8)}
+.gcard.no::after{background:radial-gradient(circle,#F28B82,transparent 70%);opacity:.22}
+.gk{font:600 10.5px var(--f-mono);letter-spacing:.16em;text-transform:uppercase;opacity:.75}
+.gcard h4{font:italic 600 clamp(34px,4vw,46px)/1 var(--f-display);margin:8px 0 18px;letter-spacing:-.02em}
+.gcard.yes h4{color:#fff}.gcard.no h4{color:#F28B82}
+.gcard ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.gcard li{display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start;font:500 18px/1.4 var(--f-display);letter-spacing:-.005em;padding:10px 12px;margin:0 -12px;border-radius:12px;transition:background .25s,transform .25s}
+.gcard li:hover{background:rgba(255,255,255,.07);transform:translateX(4px)}
+.gcard li b{color:#fff;font-weight:700;background:linear-gradient(transparent 62%,rgba(111,211,168,.35) 62%)}
+.gcard.no li span{text-decoration:line-through;text-decoration-color:rgba(242,139,130,.55);text-decoration-thickness:1.5px}
+.gcard li em{font-style:italic;opacity:.7;text-decoration:none;display:inline-block}
+.gcard li svg{width:26px;height:26px;margin-top:1px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gcard.yes li svg circle{fill:rgba(111,211,168,.18);stroke:#6FD3A8}.gcard.yes li svg path{stroke:#fff}
+.gcard.no li svg circle{fill:rgba(242,139,130,.14);stroke:#F28B82}.gcard.no li svg path{stroke:#F28B82}
+.gcard li svg path{stroke-dasharray:20;stroke-dashoffset:0}
+.gng.armed .gcard li{opacity:0;transform:translateY(14px)}
+.gng.armed .gcard li svg path{stroke-dashoffset:20}
+.gng.go .gcard li{opacity:1;transform:none;transition:opacity .5s ease calc(var(--i)*.11s + .1s),transform .6s cubic-bezier(.2,.7,.2,1) calc(var(--i)*.11s + .1s),background .25s}
+.gng.go .gcard li svg path{stroke-dashoffset:0;transition:stroke-dashoffset .5s ease calc(var(--i)*.11s + .45s)}
+.gng.go .gcard.no li{transition-delay:calc(var(--i)*.11s + .3s)}
+@keyframes gfloat{0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,24px)}}
+@media (max-width:760px){.gng{grid-template-columns:1fr}.gcard{padding:24px 22px}.gcard li{font-size:16.5px}}
+@media (prefers-reduced-motion: reduce){.gcard::after{animation:none}.gng.armed .gcard li{opacity:1;transform:none}.gng.armed .gcard li svg path{stroke-dashoffset:0}}
+
+/* stand-out subheadings */
+.band .wrap>h3,.head>h3{position:relative;font-size:clamp(24px,2.5vw,30px);font-weight:700;letter-spacing:-.015em;width:fit-content;max-width:100%;color:#174A39;padding-bottom:10px}
+.dk .wrap>h3,.dk .head>h3{color:#FFFFFF}
+.band .wrap>h3::after,.head>h3::after{content:"";position:absolute;left:0;bottom:0;height:4px;width:100%;border-radius:4px;background:linear-gradient(90deg,#23684F,#3FA37D 55%,#E3A93B);background-size:200% 100%;transform-origin:left;transform:scaleX(0);transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+.dk .wrap>h3::after,.dk .head>h3::after{background-image:linear-gradient(90deg,#6FD3A8,#E3A93B 60%,#6FD3A8)}
+.band .wrap>h3.lit::after,.head>h3.lit::after{transform:scaleX(1);animation:hshine 4s ease-in-out 1s infinite}
+@keyframes hshine{0%,100%{background-position:0 0}50%{background-position:100% 0}}
+@media (prefers-reduced-motion: reduce){.band .wrap>h3::after,.head>h3::after{transform:none;animation:none!important}}
+.band .wrap>h3{margin-top:34px;margin-bottom:14px}
+.label{display:inline-block;font:700 11.5px var(--f-mono);letter-spacing:.1em;color:var(--mint-strong);background:var(--mint-soft);padding:5px 10px;border-radius:7px;margin-bottom:10px}
+.hl-card .label{background:rgba(227,169,59,.16)}
+.card.prob{background:linear-gradient(160deg,#E6F3EC,#D5EADF);border-color:#B5D6C3}
+.card.prob .kv dt{color:#1F5C45}
+.label{width:fit-content;align-self:flex-start}
+td.r{white-space:nowrap}
+</style>
+
+<nav class="top" id="nav" aria-label="Sections">
+  <div class="wrap">
+    <a class="logo" href="#top">TESSERA<b>·</b><span class="full">CASE STUDY</span></a>
+    <button class="menu" id="menuBtn" type="button" aria-expanded="false" aria-controls="links">Sections <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.5 6 8l4-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    <div class="links" id="links">
+      <div class="nv start"><a class="pill" href="#s1">Problem</a><div class="dd"><span class="ddh">Problem</span><a href="#s1-wants"><i>01</i>What creators want</a><a href="#s1-life"><i>02</i>Where it breaks</a><a href="#s1-probs"><i>03</i>Two problems, not three</a><a href="#s1-fill"><i>04</i>Why campaigns under-fill</a><a href="#s1-cause"><i>05</i>Symptom or cause?</a><a href="#s1-prio"><i>06</i>Which problem first</a><a href="#stmt"><i>07</i>Problem statement</a></div></div>
+      <div class="nv start"><a class="pill" href="#s2">Feature</a><div class="dd"><span class="ddh">Feature</span><a href="#s2-focus"><i>01</i>Why this focus area</a><a href="#s2-users"><i>02</i>Target users</a><a href="#s2-feats"><i>03</i>The core loop (v1)</a><a href="#s2-later"><i>04</i>Not in v1</a><a href="#s2-flow"><i>05</i>User flow &amp; drop-offs</a><a href="#s2-score"><i>06</i>How the score works</a><a href="#s2-success"><i>07</i>Success criteria</a></div></div>
+      <div class="nv"><a class="pill" href="#s3">PRD</a><div class="dd"><span class="ddh">PRD</span><a href="#s3-goals"><i>01</i>Goals &amp; non-goals</a><a href="#s3-stories"><i>02</i>User stories</a><a href="#s3-req"><i>03</i>Requirements as a flow</a><a href="#s3-ac"><i>04</i>Acceptance criteria</a><a href="#s3-states"><i>05</i>States &amp; notifications</a><a href="#s3-edge"><i>06</i>Edge cases &amp; risks</a><a href="#s3-dep"><i>07</i>Dependencies</a><a href="#s3-plan"><i>08</i>Plan &amp; team questions</a></div></div>
+      <div class="nv"><a class="pill" href="#s4">Metrics</a><div class="dd"><span class="ddh">Metrics</span><a href="#s4-mets"><i>01</i>Headline metrics</a><a href="#s4-target"><i>02</i>Is +0.6 realistic?</a><a href="#s4-guard"><i>03</i>Guardrails &amp; sizing</a><a href="#s4-ab"><i>04</i>Campaign-level A/B test</a></div></div>
+      <div class="nv end"><a class="pill" href="#s5">Trade-offs</a><div class="dd"><span class="ddh">Trade-offs</span><a href="#s5-not"><i>01</i>Left out on purpose</a><a href="#s5-road"><i>02</i>Where the work goes</a><a href="#s5-half"><i>03</i>If we had half the team</a></div></div>
+      <div class="nv end"><a class="pill" href="#s7">Bonus</a><div class="dd"><span class="ddh">Bonus</span><a href="#s7-idea"><i>01</i>The rejected idea</a><a href="#s7-no"><i>02</i>Why I said no</a></div></div>
+      <div class="nv end"><a class="pill" href="#s8">Wireframe</a><div class="dd"><span class="ddh">Wireframe</span><a href="#s8-embed"><i>01</i>Clickable flow</a><a href="#s8-try"><i>02</i>How to use it</a></div></div>
+    </div>
+  </div>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+</nav>
+
+<!-- HERO -->
+<section id="top" class="band dk hero c-butter">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-left">
+        <span class="eyebrow"><i></i>Tessera · a PM case study</span>
+        <h1>Help creators apply to <span class="serif">campaigns they can win,</span> and brands <span class="hl">find them</span> faster.</h1>
+        <div class="meta"><span class="chip">Prepared by Alisha Chaudhari</span><span class="chip hot">Focus: Campaign discovery &amp; matching</span><span class="chip">Nov 2026</span></div>
+        <p class="lede">Problem framing, a core-loop MVP, a PRD-lite and one experiment randomised by campaign, built so the result shows whether <b>more paid work actually gets done</b>.</p>
+        <div class="cta"><a class="btn pri" href="#s1">Start with the problem</a></div>
+        <p class="note">Tessera, its brands and creators are fictional. Every number marked <span class="A">A</span> is my assumption, with a week-1 check.</p>
+      </div>
+      <div class="principle">
+        <span class="eyebrow"><i></i>The core loop I'd test</span>
+        <p class="big">See fit → apply to fit → rank by fit → get a reasoned decision.</p>
+        <p>Everything outside this loop waits until the test shows more slots get filled. Not more applications, not a better ratio: more paid work.</p>
+      </div>
+    </div>
+    <div class="facts">
+      <div class="fact c-butter"><span class="k">Primary user</span><b>10K–100K</b><span>Micro creators: most of the supply, most hurt by blind applying</span></div>
+      <div class="fact c-butter"><span class="k">Primary metric</span><b>4.0 → 4.3–4.8</b><span>filled slots per campaign <span class="A">A</span></span></div>
+      <div class="fact c-butter"><span class="k">v1 effort</span><b>~18 weeks of work</b><span>≈ 6 weeks with 3 engineers <span class="A">A</span></span></div>
+      <div class="fact c-butter"><span class="k">Approach</span><b>Rules, not AI</b><span>enough to test whether fit drives filled slots</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 1 -->
+<section id="s1" class="band c-butter">
+  <div class="wrap">
+    <div class="head"><span class="eyebrow"><i></i>01 · Problem discovery &amp; framing</span><h2>Start with what creators are <span class="serif">actually</span> trying to do</h2>
+      <p class="lede">Before listing problems, I mapped what a mid-size creator needs from a marketplace, and what they're afraid of. These are hypotheses to test in interviews, not findings.</p></div>
+
+    <div id="s1-wants" class="wants">
+      <div class="want rv c-butter"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 17l5-5 4 4 8-8"/><path d="M15 8h5v5"/></svg></div><h4>Predictable income</h4><p>A steady pipeline of paid work, not one lucky win a month.</p><span class="fear">months where nothing comes through</span></div>
+      <div class="want rv c-butter"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h4>Their time respected</h4><p>A good pitch takes ~20 min. 12 pitches is ~4 hours of unpaid work for 1 win <span class="A">A</span>.</p><span class="fear">pitching into a void</span></div>
+      <div class="want rv c-butter"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 5h10M7 9h10M7 5c5 0 7 1.5 7 4s-2 4-7 4l7 7"/></svg></div><h4>Fair pay</h4><p>Knowing before applying whether the budget covers their rate. Many micro creators aren't sure what their rate should be.</p><span class="fear">being lowballed, or underpricing out of desperation</span></div>
+      <div class="want rv c-butter"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div><h4>Audience trust</h4><p>Promoting brands that suit their followers. Their audience is their whole business.</p><span class="fear">looking like a sell-out</span></div>
+      <div class="want rv c-butter"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div><h4>Treated as a professional</h4><p>A real decision with a reason, on a known date, from a brand that pays on time.</p><span class="fear">silence, then seeing someone else's post</span></div>
+      <div class="want rv c-butter"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20V8M6 14l6-6 6 6"/><path d="M4 4h16"/></svg></div><h4>Room to grow</h4><p>Knowing what would get them into bigger campaigns.</p><span class="fear">staying stuck without knowing why</span></div>
+    </div>
+    <div class="callout rv"><b>The insight behind everything below:</b> for a creator, an application is unpaid work and a silent rejection is a small blow to their confidence. My guess <span class="A">A</span> is that a marketplace that makes them apply blind slowly loses them, and brands are left with a thinner pool.</div>
+
+    <h3 id="s1-life">Where it breaks in the lifecycle</h3>
+    <figure class="fig rv">
+      <svg viewBox="0 0 1000 240" role="img" aria-label="Creator and brand lifecycle with three problem markers">
+        <text class="d-l" x="10" y="44">CREATOR</text><text class="d-l" x="10" y="164">BRAND</text>
+        <rect class="d-box" x="90" y="20" width="120" height="44" rx="10"/><text class="d-t" x="150" y="47" text-anchor="middle">Sign up &amp; profile</text>
+        <rect class="d-r" x="230" y="20" width="120" height="44" rx="10"/><text class="d-t" x="290" y="47" text-anchor="middle">Find campaigns</text>
+        <rect class="d-r" x="370" y="20" width="120" height="44" rx="10"/><text class="d-t" x="430" y="47" text-anchor="middle">Apply</text>
+        <rect class="d-box" x="510" y="20" width="120" height="44" rx="10"/><text class="d-t" x="570" y="47" text-anchor="middle">Wait for answer</text>
+        <rect class="d-box" x="650" y="20" width="120" height="44" rx="10"/><text class="d-t" x="710" y="47" text-anchor="middle">Create content</text>
+        <rect class="d-b" x="790" y="20" width="120" height="44" rx="10"/><text class="d-t" x="850" y="47" text-anchor="middle">Get paid</text>
+        <rect class="d-box" x="90" y="140" width="120" height="44" rx="10"/><text class="d-t" x="150" y="167" text-anchor="middle">Write brief</text>
+        <rect class="d-box" x="230" y="140" width="120" height="44" rx="10"/><text class="d-t" x="290" y="167" text-anchor="middle">Launch</text>
+        <rect class="d-r" x="370" y="140" width="120" height="44" rx="10"/><text class="d-t" x="430" y="167" text-anchor="middle">Review applicants</text>
+        <rect class="d-r" x="510" y="140" width="120" height="44" rx="10"/><text class="d-t" x="570" y="167" text-anchor="middle">Select creators</text>
+        <rect class="d-box" x="650" y="140" width="120" height="44" rx="10"/><text class="d-t" x="710" y="167" text-anchor="middle">Review content</text>
+        <rect class="d-b" x="790" y="140" width="120" height="44" rx="10"/><text class="d-t" x="850" y="167" text-anchor="middle">Approve content</text>
+        <path class="flow slow" d="M430 64v76"/><text class="d-s" x="438" y="106">application</text>
+        <path class="flow slow" d="M570 140V64"/><text class="d-s" x="578" y="106">decision</text>
+        <path class="flow slow" d="M850 140V64"/><text class="d-s" x="858" y="106">approval → payout</text>
+        <circle class="d-dot" cx="350" cy="20" r="11"/><text class="d-dot-t" x="350" y="24" text-anchor="middle">P1</text>
+        <circle class="d-dot" cx="490" cy="140" r="11"/><text class="d-dot-t" x="490" y="144" text-anchor="middle">P2</text>
+        <circle class="d-dot b" cx="910" cy="20" r="11"/><text class="d-dot-t k" x="910" y="24" text-anchor="middle">P3</text>
+        <text class="d-s" x="90" y="226">Red: P1 and P2 are the same gap seen from each side, where creator and brand meet. Yellow: P3 sits at payout.</text>
+      </svg>
+    </figure>
+
+    <div class="head" style="margin:18px 0 0" id="s1-probs"><h3 style="margin:0">Two problems, not three</h3>
+      <p class="lede" style="font-size:16px">P1 and P2 are <b>one problem seen from two sides</b>: Tessera never captures who fits what. P3 is a separate problem. I show P1 and P2 apart only because each side feels it differently.</p></div>
+    <div class="grid" style="gap:16px">
+      <article class="card lift prob rv c-butter"><div class="pn">P1</div><div>
+        <h3>Creator side: applying blind, hearing nothing back</h3>
+        <dl class="kv">
+          <dt>Who</dt><dd>Creators, especially micro creators (10K–100K), who are most of the supply</dd>
+          <dt>Where</dt><dd>Finding campaigns → applying → waiting</dd>
+          <dt>What happens</dt><dd>The feed is newest-first. Follower minimums, audience and city requirements are buried in free-text briefs, so creators apply to campaigns they can't win. Rejections come late or never, with no reason.</dd>
+          <dt>Why it matters</dt><dd>My guess <span class="A">A</span>: creators stop applying after 2–3 silent rejections. If that's true, supply thins out in exactly the niches brands need.</dd>
+          <dt>How I'd check it</dt><dd>Hand-tag 200 recent applications for missed requirements · return-to-apply rate after 1, 2 and 3 straight rejections · 12 creator interviews.</dd>
+        </dl></div></article>
+      <article class="card lift prob rv c-butter"><div class="pn">P2</div><div>
+        <h3>Brand side: drowning in applicants who don't fit</h3>
+        <dl class="kv">
+          <dt>Who</dt><dd>Brand marketing managers at D2C brands, often a team of one or two</dd>
+          <dt>Where</dt><dd>Reviewing applicants → selecting creators</dd>
+          <dt>What happens</dt><dd>~70 unranked applicants per campaign <span class="A">A</span>. To judge fit, the manager opens each Instagram profile, looks at their content and asks for audience screenshots. It takes 4–6 hours; median time to a shortlist is 6 days <span class="A">A</span>.</dd>
+          <dt>Why it matters</dt><dd>Revenue is commission on completed work. ~45% of campaigns don't fill every slot within 14 days of closing <span class="A">A</span>, and my guess <span class="A">A</span> is that brands with a slow first campaign rarely run a second.</dd>
+          <dt>How I'd check it</dt><dd>Launch-to-shortlist time · profile views per applicant · repeat rate for brands whose first campaign under-filled · 6 brand interviews.</dd>
+        </dl></div></article>
+      <article class="card lift prob rv c-butter"><div class="pn">P3</div><div>
+        <h3>A separate problem: creators can't see when they'll be paid</h3>
+        <dl class="kv">
+          <dt>Who</dt><dd>Creators who have won and delivered, plus the support team</dd>
+          <dt>Where</dt><dd>Content approval → payout</dd>
+          <dt>What happens</dt><dd>Payout starts only when the brand approves content, which has no deadline or visible status. ~30% wait more than 14 days <span class="A">A</span>.</dd>
+          <dt>Why it matters</dt><dd>Damages trust among the creators who already succeed, and creates support load. But it only touches creators who were selected, about a quarter of active creators each quarter <span class="A">A</span>.</dd>
+          <dt>How I'd check it</dt><dd>Approval-to-payout delays · payment support tickets · whether top creators who waited long stopped applying.</dd>
+        </dl></div></article>
+    </div>
+
+    <h3 id="s1-fill">Why campaigns under-fill: four causes, not one</h3>
+    <p class="lede" style="font-size:16px">"45% of campaigns under-fill" has at least four causes, and matching fixes only some of them. Before committing, I'd tag last quarter's under-filled campaigns by cause in week 1. The shares below are my guesses <span class="A">A</span>.</p>
+    <div class="tw minw-900 rv"><table>
+      <thead><tr><th>Cause</th><th class="r">My guess <span class="A">A</span></th><th>How week-1 data shows it</th><th>Does matching fix it?</th><th>v1 lever</th></tr></thead>
+      <tbody>
+        <tr class="win"><td><b>Brand is slow to decide</b>, buried in poor fits</td><td class="r">~35%</td><td>Slots still open with qualified applicants waiting; days from close to shortlist</td><td><span class="tag mint">Yes</span></td><td>Ranked list, reasons, decision deadline</td></tr>
+        <tr><td><b>Too few qualified creators</b> exist for the brief</td><td class="r">~25%</td><td>Fewer qualified applicants than slots</td><td><span class="tag butter">Partly</span></td><td>Invites to qualified creators who didn't apply</td></tr>
+        <tr><td><b>Budget is below</b> what fitting creators charge</td><td class="r">~25%</td><td>Qualified applicants quoted above budget; brand declined "quote above budget"</td><td><span class="tag tomato">No</span></td><td>None in v1. Pricing guidance is a separate fix</td></tr>
+        <tr><td><b>Shortlisted creators decline</b> the offer</td><td class="r">~15%</td><td>Offers declined or expired</td><td><span class="tag tomato">Risk</span>: could rise</td><td>Availability toggle, invite cap, offer-acceptance guardrail</td></tr>
+      </tbody></table></div>
+    <div class="callout rv">So matching directly addresses roughly a third of under-fill and partly helps another quarter. <b>If week-1 data shows budget is the biggest cause, pricing guidance should come before matching.</b> That's a kill criterion, not a footnote.</div>
+
+    <h3 id="s1-cause">Symptom or cause?</h3>
+    <div class="tw minw-720 rv"><table>
+      <thead><tr><th>What the team hears</th><th>What's really going on</th><th>Root cause</th></tr></thead>
+      <tbody>
+        <tr><td>"We get lots of applications"</td><td>Most miss a stated requirement</td><td rowspan="3" style="vertical-align:middle;background:var(--tomato-soft)"><b>Fit is invisible.</b> Requirements and audience data aren't captured as fields, so the product can't filter, rank or explain.</td></tr>
+        <tr><td>"Creators go quiet"</td><td>They stop after repeated silent rejections</td></tr>
+        <tr><td>"Brands keep asking us to pick creators"</td><td>The product doesn't surface the right ones</td></tr>
+        <tr><td>"Creators chase us about money"</td><td>Content approval has no deadline</td><td><b>No approval deadline</b> and no payout status</td></tr>
+      </tbody></table></div>
+
+    <h3 id="s1-prio">Which problem first</h3>
+    <div class="tw minw-720 rv"><table>
+      <thead><tr><th>Problem</th><th>Pain</th><th>Business impact</th><th>Reach</th><th>Call</th></tr></thead>
+      <tbody>
+        <tr class="win"><td><b>Fit is invisible</b> (P1 + P2)</td><td>High</td><td>High: under-fill is lost commission</td><td>Every campaign, every active creator</td><td><span class="tag violet">Now</span></td></tr>
+        <tr><td><b>Payout timing</b> (P3)</td><td>Very high per person</td><td>Medium: churn among winners</td><td>~25% of creators a quarter <span class="A">A</span></td><td><span class="tag mint">Next</span></td></tr>
+      </tbody></table></div>
+    <p class="small muted">Rough judgements, not a formula. The deciding reason is that one fix reaches both sides of every campaign.</p>
+  </div>
+</section>
+
+<!-- STATEMENT -->
+<section id="stmt" class="band statement">
+  <div class="wrap">
+    <span class="eyebrow"><i></i>Problem statement</span>
+    <h2>Creators can't tell which campaigns they can win, and brands can't tell <span class="serif">which applicants fit.</span></h2>
+    <p class="lede">Because Tessera doesn't capture or show fit, creators spend unpaid hours on applications they can't win, and brands take a week to shortlist and leave slots unfilled.</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="s2" class="band dk c-butter">
+  <div class="wrap">
+    <div class="head"><span class="eyebrow"><i></i>02 · Feature proposal</span><h2>Fit-first <span class="serif">matching</span></h2>
+      <p class="lede">Of the five focus areas, discovery &amp; matching is the one that fixes the shared root cause behind P1 and P2.</p></div>
+    <div id="s2-focus" class="tw minw-900 rv"><table>
+      <thead><tr><th>Focus area</th><th>Solves</th><th>Why / why not now</th></tr></thead>
+      <tbody>
+        <tr class="win"><td><b>Discovery &amp; matching</b> <span class="tag violet">chosen</span></td><td>P1 + P2</td><td>Fixes the shared root cause. Every campaign and every active creator feels it. Buildable with simple rules.</td></tr>
+        <tr><td><b>Payout transparency</b> <span class="tag mint">next</span></td><td>P3</td><td>High pain, narrower reach. The real fix needs a finance-side approval deadline first.</td></tr>
+        <tr><td><b>Onboarding &amp; activation</b></td><td>Early drop-off</td><td>Faster onboarding into a blind feed only speeds up rejections. The structured profile here covers the useful part.</td></tr>
+        <tr><td><b>Campaign management</b></td><td>Content review</td><td>Happens after selection; doesn't help campaigns fill. Large build.</td></tr>
+        <tr><td><b>Community</b></td><td>Isolation</td><td>Nice to have. Doesn't change whether creators get paid work.</td></tr>
+      </tbody></table></div>
+
+    <div class="grid">
+      <div id="s2-users" class="card lift prose rv"><span class="label">Target users</span>
+        <p><b>Primary: micro creators (10K–100K)</b> in skincare, food, fashion and wellness. Most of the supply, most hurt by blind applying, most likely to churn.</p>
+        <p><b>Secondary: brand marketing managers</b> at D2C brands running 1–3 campaigns a quarter, usually with no agency. They want content that performs and fits their look, and a shortlist fast enough to hit their launch date.</p>
+        <p><b>Internal: Creator Ops</b>, who hand-match today and would own tuning the rules.</p></div>
+      
+    </div>
+
+    <h3 id="s2-feats">The core loop: six things in v1, and the outcome each is for</h3>
+    <div class="feats">
+      <div class="card lift feat rv c-butter"><div class="n">1</div><div><h4>Structured brief <span class="tag mint">v1</span></h4><p>Niche, deliverables, budget range, follower minimum, audience age, gender and location, slots and deadline as fields instead of free text.</p><div class="out">Requirements become something the product can filter and rank on</div></div></div>
+      <div class="card lift feat rv c-butter"><div class="n">2</div><div><h4>Structured creator profile <span class="tag mint">v1</span></h4><p>Up to 3 niches and a rate per deliverable, with a suggested range by size and niche for creators who don't know their rate <span class="A">A</span>. Audience split and engagement are copied from Instagram Insights, labelled "self-reported", and verified only once a brand shortlists them.</p><div class="out">Brands stop asking for screenshots (measure: screenshot requests per campaign)</div></div></div>
+      <div class="card lift feat rv c-butter"><div class="n">3</div><div><h4>"You qualify" / "Not eligible yet" <span class="tag mint">v1</span></h4><p>Campaigns a creator can't apply to move into their own tab, with the exact gap, like "1.8K followers short". A brand can still invite a near-miss, so a careless minimum isn't absolute.</p><div class="out">Fewer wasted applications; a rejection becomes a goal</div></div></div>
+      <div class="card lift feat rv c-butter"><div class="n">4</div><div><h4>Match score with reasons <span class="tag mint">v1</span></h4><p>0–100 with a label (Strong / Good / Stretch), the main reason and the weakest point in plain words. Both sides see the same breakdown. The brand's list also shows each creator's 3 latest posts, because brands choose on look and tone, which the score doesn't judge.</p><div class="out">Creators apply where they can win; brands shortlist in minutes</div></div></div>
+      <div class="card lift feat rv c-butter"><div class="n">5</div><div><h4>A decision by a set date <span class="tag mint">v1</span></h4><p>Brands shortlist, or decline with one of five reasons. Applications still undecided 5 days after closing close automatically, and that counts against the brand: every campaign card shows the brand's response rate, typical response time and paid-on-time %.</p><div class="out">Brands have a reason to decide; creators can choose brands that answer</div></div></div>
+      <div class="card lift feat rv c-butter"><div class="n">6</div><div><h4>Invite strong creators <span class="tag mint">v1</span></h4><p>A "Suggested" list of strong matches who haven't applied, with one-click invites. Capped at 5 open invites per creator per week <span class="A">A</span>, and creators can mark themselves unavailable, so the same top creators aren't flooded.</p><div class="out">Campaigns fill when applicants are thin, without overbooking the top creators</div></div></div>
+    </div>
+    <div id="s2-later" class="callout rv"><b>Not in v1, on purpose:</b> live count of qualifying creators while writing the brief · warning when the budget is below market · "notify me when I qualify" · Instagram auto-sync for every creator · YouTube. Each is reasonable, but none is needed to test whether fit drives filled slots.</div>
+
+    <h3 id="s2-flow">User flow</h3>
+    <figure class="fig rv">
+      <svg viewBox="0 0 1000 300" role="img" aria-label="Creator and brand flows connected by application, invite, decline reason and offer">
+        <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="var(--ink-3)"/></marker><marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="var(--violet)"/></marker></defs>
+        <text class="d-l" x="10" y="24">CREATOR</text><text class="d-l" x="10" y="190">BRAND</text>
+        <rect class="d-box" x="10" y="36" width="140" height="58" rx="12"/><text class="d-t" x="80" y="60" text-anchor="middle">Alert</text><text class="d-s" x="80" y="78" text-anchor="middle">new match or invite</text>
+        <rect class="d-box" x="176" y="36" width="140" height="58" rx="12"/><text class="d-t" x="246" y="60" text-anchor="middle">Feed</text><text class="d-s" x="246" y="78" text-anchor="middle">only what you qualify for</text>
+        <rect class="d-box" x="342" y="36" width="140" height="58" rx="12"/><text class="d-t" x="412" y="60" text-anchor="middle">Campaign detail</text><text class="d-s" x="412" y="78" text-anchor="middle">fit, pay, brand record</text>
+        <rect class="d-v" x="508" y="36" width="140" height="58" rx="12"/><text class="d-t" x="578" y="60" text-anchor="middle">Apply</text><text class="d-s" x="578" y="78" text-anchor="middle">quote + short pitch</text>
+        <rect class="d-box" x="674" y="36" width="140" height="58" rx="12"/><text class="d-t" x="744" y="60" text-anchor="middle">Track</text><text class="d-s" x="744" y="78" text-anchor="middle">decision by a set date</text>
+        <rect class="d-v" x="840" y="36" width="150" height="58" rx="12"/><text class="d-t" x="915" y="60" text-anchor="middle">Accept offer</text><text class="d-s" x="915" y="78" text-anchor="middle">contact unlocked</text>
+        <rect class="d-box" x="10" y="202" width="140" height="58" rx="12"/><text class="d-t" x="80" y="226" text-anchor="middle">Structured brief</text><text class="d-s" x="80" y="244" text-anchor="middle">fields, not free text</text>
+        <rect class="d-box" x="176" y="202" width="140" height="58" rx="12"/><text class="d-t" x="246" y="226" text-anchor="middle">Suggested</text><text class="d-s" x="246" y="244" text-anchor="middle">invite (capped)</text>
+        <rect class="d-v" x="508" y="202" width="140" height="58" rx="12"/><text class="d-t" x="578" y="226" text-anchor="middle">Ranked applicants</text><text class="d-s" x="578" y="244" text-anchor="middle">score, reason, posts</text>
+        <rect class="d-box" x="674" y="202" width="140" height="58" rx="12"/><text class="d-t" x="744" y="226" text-anchor="middle">Shortlist / decline</text><text class="d-s" x="744" y="244" text-anchor="middle">reason required</text>
+        <rect class="d-v" x="840" y="202" width="150" height="58" rx="12"/><text class="d-t" x="915" y="226" text-anchor="middle">Verify &amp; offer</text><text class="d-s" x="915" y="244" text-anchor="middle">shortlisted only</text>
+        <path class="d-arrow" d="M150 65h22" marker-end="url(#ah2)"/><path class="d-arrow" d="M316 65h22" marker-end="url(#ah2)"/><path class="d-arrow" d="M482 65h22" marker-end="url(#ah2)"/><path class="d-arrow" d="M648 65h22" marker-end="url(#ah2)"/><path class="d-arrow" d="M814 65h22" marker-end="url(#ah2)"/>
+        <path class="d-arrow" d="M150 231h22" marker-end="url(#ah2)"/><path class="d-arrow" d="M316 231h188" marker-end="url(#ah2)"/><path class="d-arrow" d="M648 231h22" marker-end="url(#ah2)"/><path class="d-arrow" d="M814 231h22" marker-end="url(#ah2)"/>
+        <path class="flow" d="M578 94v104" marker-end="url(#ah3)"/><text class="flowlbl" x="586" y="150">application</text>
+        <path class="flow" d="M246 202V98" marker-end="url(#ah3)"/><text class="flowlbl" x="254" y="150">invite</text>
+        <path class="flow" d="M744 202V98" marker-end="url(#ah3)"/><text class="flowlbl" x="752" y="140">reason, if declined</text>
+        <path class="flow" d="M915 202V98" marker-end="url(#ah3)"/><text class="flowlbl" x="923" y="150">offer</text>
+        <text class="d-s" x="10" y="292">Dashed lines cross between the two sides. Each is something creators lacked, or got too late, in today's flow.</text>
+      </svg>
+    </figure>
+    <div class="tw minw-720 rv"><table>
+      <thead><tr><th>Where creators drop off today</th><th>What changes</th></tr></thead>
+      <tbody>
+        <tr><td>Scrolling campaigns they can't win</td><td>The feed shows only campaigns they qualify for, best fit first</td></tr>
+        <tr><td>Finding out the pay is too low after writing a pitch</td><td>The card says whether the budget covers their rate before they apply</td></tr>
+        <tr><td>A long application form</td><td>Three short steps, with the quote prefilled from their profile</td></tr>
+        <tr><td>Silence after applying</td><td>A decision with a reason by a set date, and the brand's response record visible before applying</td></tr>
+      </tbody></table></div>
+
+    <h3 id="s2-score">How the match score works</h3>
+    <p class="lede" style="font-size:16px">Simple rules, not a trained model: we don't have clean outcome data to train on yet, and rules are enough to test whether fit drives filled slots. Hard requirements (platform, follower minimum, city) are pass/fail; everything else adds up to 100. Move the sliders to see how the score and the creator's explanation change.</p>
+    <div id="s2-play" class="play rv">
+      <div class="controls">
+        <div class="ctl"><span class="label">Hard requirements (pass / fail)</span>
+          <div class="seg" id="gate"><button class="on" data-v="1">Meets all</button><button data-v="0">Misses one (e.g. 1.8K followers short)</button></div></div>
+        <div class="ctl"><span class="label">Niche fit · 30</span>
+          <div class="seg" id="niche"><button class="on" data-v="30">Main niche</button><button data-v="22">Second niche</button><button data-v="10">Related</button><button data-v="0">Unrelated</button></div></div>
+        <div class="ctl"><label for="aud">Audience matches the brand's target <output id="audO">77%</output></label><input type="range" id="aud" min="0" max="100" value="77"></div>
+        <div class="ctl"><label for="eng">Engagement vs typical for their size <output id="engO">1.5×</output></label><input type="range" id="eng" min="25" max="200" value="153" step="1"></div>
+        <div class="ctl"><span class="label">Budget fit · 15</span>
+          <div class="seg" id="bud"><button class="on" data-v="15">Covers their rate</button><button data-v="9">A little under</button><button data-v="3">Well under</button></div></div>
+        <div class="ctl"><span class="label">Track record · 5</span>
+          <div class="seg" id="rel"><button data-v="5">All on time</button><button class="on" data-v="4.44">8 of 9 on time</button><button data-v="4">New creator</button><button data-v="2.5">Half late</button></div></div>
+      </div>
+      <div class="out" aria-live="polite">
+        <div class="bigring"><svg viewBox="0 0 150 150"><circle class="bg" cx="75" cy="75" r="62"/><circle class="fg" id="pgRing" cx="75" cy="75" r="62" stroke-dasharray="389.6" stroke-dashoffset="389.6"/></svg><span id="pgScore">0</span></div>
+        <div class="verdict"><b id="pgLabel">Strong match</b><small id="pgSub">Shown first in her feed and near the top of the brand's list</small></div>
+        <div class="bd"><span>Niche</span><div class="tr"><i id="b1"></i></div><span id="v1">30/30</span></div>
+        <div class="bd"><span>Audience</span><div class="tr"><i id="b2"></i></div><span id="v2">23/30</span></div>
+        <div class="bd"><span>Engagement</span><div class="tr"><i id="b3"></i></div><span id="v3">19/20</span></div>
+        <div class="bd"><span>Budget</span><div class="tr"><i id="b4"></i></div><span id="v4">15/15</span></div>
+        <div class="bd"><span>Track record</span><div class="tr"><i id="b5"></i></div><span id="v5">4/5</span></div>
+        <div class="say" id="pgSay">What the creator reads: “Skincare is your main niche. Weakest point: audience fit.”</div>
+      </div>
+    </div>
+    <p class="small muted">Labels: Strong 80+, Good 65–79, Stretch below 65. Ops should be able to retune the weights without a release (Engineering to confirm).</p>
+    <div class="grid g2">
+      <div id="s2-ex" class="card lift prose rv"><span class="label">Worked example: Aanya × Kora Botanics = 92</span>
+        <ul class="clean"><li><b>Niche 30/30</b>: skincare is her main niche</li><li><b>Audience 23/30</b>: 71% women, 64% in metros, but only 41% aged 25–34, the brand's target. That's her weakest point, and she sees it.</li><li><b>Engagement 19/20</b>: 4.6% vs 3.0% typical at her size</li><li><b>Budget 15/15</b>: up to ₹38K covers her ₹36K rate</li><li><b>Track record 4/5</b>: 8 of 9 past jobs on time</li></ul></div>
+      <div id="s2-fair" class="card lift prose rv"><span class="label">Fairness choices, and the gaps I know about</span>
+        <ul class="clean"><li><b>New creators aren't punished:</b> no history scores a neutral 4/5, not 0</li><li><b>Track record is only 5 points</b>, so one late delivery doesn't lock someone out</li><li><b>Location only counts when the brand asks for it</b>, so smaller-city creators aren't marked down by default</li><li><b>Creators see exactly what brands see.</b> No hidden ranking.</li>
+        <li style="--dot:var(--tomato)"><b>Known gap: content style.</b> Brands mostly choose on look and tone, which the score doesn't judge. The latest posts sit next to the score, and the week-2 back-test is where this would show.</li>
+        <li style="--dot:var(--tomato)"><b>Known gap: self-reported data.</b> Audience and engagement are self-reported until shortlist, so the score is only as honest as the profile until then.</li>
+        <li style="--dot:var(--tomato)"><b>Open question:</b> a visible "Stretch" label may discourage creators. Design tests label-only vs number before launch.</li></ul></div>
+    </div>
+
+    <h3 id="s2-success">Success criteria</h3>
+    <div class="grid g4 stats">
+      <div class="card stat c-butter rv"><div class="v num">4.0 → <span class="to">4.3–4.8</span></div><div class="d">filled slots per campaign, the primary test metric (+0.3 to +0.8) <span class="A">A</span></div></div>
+      <div class="card stat c-butter rv"><div class="v num">6 → <span class="to">&lt;3</span> days</div><div class="d">from campaign launch to first shortlist <span class="A">A</span></div></div>
+      <div class="card stat c-butter rv"><div class="v num"><span class="to count" data-to="80" data-suf="%">80%</span></div><div class="d">of applications get a reasoned brand decision before auto-close</div></div>
+      <div class="card stat c-butter rv"><div class="v num">≥ <span class="to count" data-to="25">25</span></div><div class="d">applications per campaign still (guardrail)</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="s3" class="band c-butter">
+  <div class="wrap">
+    <div class="head"><span class="eyebrow"><i></i>03 · PRD lite</span><h2>Fit-first matching, <span class="serif">v1</span></h2>
+      <p class="lede">Team assumption <span class="A">A</span>: 1 PM, 1 designer, 3 engineers, an analyst part-time, and Creator Ops. v1 is only the core loop.</p></div>
+    <div id="s3-goals" class="gng">
+      <div class="gcard yes"><span class="gk">What v1 must achieve</span><h4>Goals</h4><ul><li style="--i:0"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11"/><path d="M7 12.5l3.2 3.2L17 9"/></svg><span><b>More slots filled</b> per campaign, so more paid work gets done</span></li><li style="--i:1"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11"/><path d="M7 12.5l3.2 3.2L17 9"/></svg><span>Creators apply mainly to campaigns <b>they can win</b></span></li><li style="--i:2"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11"/><path d="M7 12.5l3.2 3.2L17 9"/></svg><span>Brands shortlist from a ranked list in <b>under 3 days</b></span></li><li style="--i:3"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11"/><path d="M7 12.5l3.2 3.2L17 9"/></svg><span>Applications get a <b>reasoned brand decision</b>; brands that don't decide are visible to creators</span></li></ul></div>
+      <div class="gcard no"><span class="gk">Deliberately out of scope</span><h4>Non-goals</h4><ul><li style="--i:0"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7"/></svg><span>AI or machine-learned matching</span></li><li style="--i:1"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7"/></svg><span>Chat and price negotiation</span></li><li style="--i:2"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7"/></svg><span>Changing commission or pricing <em>(see the R9 note)</em></span></li><li style="--i:3"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7"/></svg><span>Content review and approval workflow</span></li><li style="--i:4"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7"/></svg><span>Payout tracking <em>(next quarter)</em></span></li><li style="--i:5"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7"/></svg><span>Platforms beyond Instagram</span></li></ul></div>
+    </div>
+
+    <h3 id="s3-stories">User stories</h3>
+    <div class="tw minw-720 rv"><table>
+      <thead><tr><th>As a…</th><th>I want to…</th><th>So that…</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tomato">Creator</span></td><td>see only campaigns I meet the requirements for, best fit first</td><td>I stop spending hours on applications I can't win</td><td><span class="tag violet">Must</span></td></tr>
+        <tr><td><span class="tag tomato">Creator</span></td><td>see why I match and what's weakest</td><td>I can decide if it's worth my time</td><td><span class="tag violet">Must</span></td></tr>
+        <tr><td><span class="tag tomato">Creator</span></td><td>know whether the budget covers my rate before I apply</td><td>I don't underprice myself by accident</td><td><span class="tag violet">Must</span></td></tr>
+        <tr><td><span class="tag tomato">Creator</span></td><td>get a decision and a reason by a set date, and see which brands actually decide</td><td>I can plan my month and pick brands that answer</td><td><span class="tag violet">Must</span></td></tr>
+        <tr><td><span class="tag tomato">Creator</span></td><td>see campaigns I almost qualify for, and the gap</td><td>I know what to grow toward</td><td><span class="tag">Should</span></td></tr>
+        <tr><td><span class="tag mint">Brand</span></td><td>describe my campaign in fields</td><td>only creators who meet my requirements apply</td><td><span class="tag violet">Must</span></td></tr>
+        <tr><td><span class="tag mint">Brand</span></td><td>review applicants ranked by fit, with the reason and their latest posts</td><td>I shortlist in minutes and still judge their look</td><td><span class="tag violet">Must</span></td></tr>
+        <tr><td><span class="tag mint">Brand</span></td><td>invite strong creators who haven't applied, including near-misses</td><td>I fill slots when the applicant pool is thin</td><td><span class="tag violet">Must</span></td></tr>
+      </tbody></table></div>
+
+    <h3 id="s3-req">Key requirements, as one journey</h3>
+    <p class="lede" style="font-size:16px">Read left to right, then follow the arrow down and back. Each box is one requirement in plain words; the tag says who does it.</p>
+    <figure class="fig rv dk" style="background:#15181D;border-color:#2E343D">
+      <svg viewBox="0 0 1000 515" role="img" aria-label="Requirements R1 to R10 as a flow from brief to deal done">
+        <defs><marker id="ah7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="var(--ink-3)"/></marker><marker id="ah8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="var(--tomato)"/></marker></defs>
+        <rect class="d-r" x="290" y="8" width="420" height="52" rx="12"/>
+        <text class="d-t" x="500" y="29" text-anchor="middle">Doesn't qualify → "Not eligible yet" tab</text>
+        <text class="d-s" x="500" y="47" text-anchor="middle">Shows the gap (e.g. 1.8K followers short). Brand can still invite.</text>
+        <path class="d-arrow" d="M500 90V64" style="stroke:var(--tomato)" marker-end="url(#ah8)"/>
+        <rect class="d-box" x="20" y="90" width="172" height="110" rx="12"/><text class="d-l" x="34" y="112">R1 · BRAND</text><text class="d-t" x="34" y="134">Write the brief</text><text class="d-s" x="34" y="156">A form, not free text:</text><text class="d-s" x="34" y="173">niche, budget, followers,</text><text class="d-s" x="34" y="190">audience, slots, deadline</text><rect class="d-box" x="217" y="90" width="172" height="110" rx="12"/><text class="d-l" x="231" y="112">R2 · CREATOR</text><text class="d-t" x="231" y="134">Fill in the profile</text><text class="d-s" x="231" y="156">Niches, rate, audience</text><text class="d-s" x="231" y="173">Not sure of your rate?</text><text class="d-s" x="231" y="190">We suggest a range</text><rect class="d-v" x="414" y="90" width="172" height="110" rx="12"/><text class="d-l" x="428" y="112">R4 · CHECK</text><text class="d-t" x="428" y="134">Do they qualify?</text><text class="d-s" x="428" y="156">Platform, followers, city</text><text class="d-s" x="428" y="173">Yes → can apply</text><text class="d-s" x="428" y="190">No → see the note above</text><rect class="d-box" x="611" y="90" width="172" height="110" rx="12"/><text class="d-l" x="625" y="112">R5 · CREATOR</text><text class="d-t" x="625" y="134">See score + reason</text><text class="d-s" x="625" y="156">0–100 with a label</text><text class="d-s" x="625" y="173">Best reason + weakest</text><text class="d-s" x="625" y="190">point. Brand sees the same</text><rect class="d-box" x="808" y="90" width="172" height="110" rx="12"/><text class="d-l" x="822" y="112">R6 · CREATOR</text><text class="d-t" x="822" y="134">Apply in 3 steps</text><text class="d-s" x="822" y="156">Confirm quote (prefilled)</text><text class="d-s" x="822" y="173">Write a short pitch</text><text class="d-s" x="822" y="190">Review and send</text><rect class="d-box" x="20" y="270" width="172" height="110" rx="12"/><text class="d-l" x="34" y="292">R10 · BOTH</text><text class="d-t" x="34" y="314">Deal done</text><text class="d-s" x="34" y="336">Contact details unlock</text><text class="d-s" x="34" y="353">Brand's record updates</text><text class="d-s" x="34" y="370">for the next creators</text><rect class="d-box" x="217" y="270" width="172" height="110" rx="12"/><text class="d-l" x="231" y="292">R9 · BRAND</text><text class="d-t" x="231" y="314">Send the offer</text><text class="d-s" x="231" y="336">At the creator's quote</text><text class="d-s" x="231" y="353">Creator has 3 days</text><text class="d-s" x="231" y="370">to accept</text><rect class="d-box" x="414" y="270" width="172" height="110" rx="12"/><text class="d-l" x="428" y="292">R3 · CREATOR</text><text class="d-t" x="428" y="314">Prove the numbers</text><text class="d-s" x="428" y="336">Only once shortlisted:</text><text class="d-s" x="428" y="353">connect Instagram</text><text class="d-s" x="428" y="370">More than 20% off = flag</text><rect class="d-v" x="611" y="270" width="172" height="110" rx="12"/><text class="d-l" x="625" y="292">R8 · BRAND</text><text class="d-t" x="625" y="314">Decide by a date</text><text class="d-s" x="625" y="336">Shortlist, or decline</text><text class="d-s" x="625" y="353">with a reason</text><text class="d-s" x="625" y="370">Deadline: 5 days</text><rect class="d-box" x="808" y="270" width="172" height="110" rx="12"/><text class="d-l" x="822" y="292">R7 · BRAND</text><text class="d-t" x="822" y="314">See a ranked list</text><text class="d-s" x="822" y="336">Best fit first, with</text><text class="d-s" x="822" y="353">3 latest posts each</text><text class="d-s" x="822" y="370">Shortlist up to slots</text><path class="d-arrow" d="M192 145h21" marker-end="url(#ah7)"/><path class="d-arrow" d="M217 325h-21" marker-end="url(#ah7)"/><path class="d-arrow" d="M389 145h21" marker-end="url(#ah7)"/><path class="d-arrow" d="M414 325h-21" marker-end="url(#ah7)"/><path class="d-arrow" d="M586 145h21" marker-end="url(#ah7)"/><path class="d-arrow" d="M611 325h-21" marker-end="url(#ah7)"/><path class="d-arrow" d="M783 145h21" marker-end="url(#ah7)"/><path class="d-arrow" d="M808 325h-21" marker-end="url(#ah7)"/><path class="d-arrow" d="M894 200v66" marker-end="url(#ah7)"/>
+        <path class="d-arrow" d="M697 380v36" style="stroke:var(--tomato)" marker-end="url(#ah8)"/>
+        <rect class="d-r" x="447" y="420" width="500" height="58" rx="12"/>
+        <text class="d-t" x="697" y="443" text-anchor="middle">Declined → the creator sees 1 of 5 reasons</text>
+        <text class="d-s" x="697" y="463" text-anchor="middle">No decision in 5 days → closes on its own and counts against the brand</text>
+        <text class="d-s" x="20" y="505">Gold boxes are the two checkpoints. Red boxes are what happens when the answer is no.</text>
+      </svg>
+    </figure>
+    <div class="card prose rv"><span class="label">The small print, in plain words</span><ul class="clean small">
+      <li><b>R1:</b> a campaign stays open for at least 3 days.</li>
+      <li><b>R2:</b> numbers the creator types in are marked "self-reported" until they're checked.</li>
+      <li><b>R3:</b> if verified numbers are more than 20% off, the score is recalculated with the real numbers, the brand sees the new score with a "numbers updated" note and decides whether to keep the creator on the shortlist, and the creator is told why.</li>
+      <li><b>R5:</b> the score is locked when the creator applies, so it can't change while the brand reviews. If two creators tie, better audience fit wins, then whoever applied first.</li>
+      <li><b>R6:</b> the pitch is 80–600 characters. Quoting above the budget is allowed, with a warning.</li>
+      <li><b>R9:</b> I'm assuming <span class="A">A</span> Tessera charges brands 15% today. Fixing the offer at the creator's quote would be a pricing change, so it needs its own decision.</li>
+      <li><b>R10:</b> a creator gets at most 5 open invites a week <span class="A">A</span> and can mark themselves unavailable. A brand with no history shows as "New brand".</li>
+    </ul></div>
+
+    <h3 id="s3-ac">Acceptance criteria (examples)</h3>
+    <div class="tw minw-900 rv"><table>
+      <thead><tr><th>Requirement</th><th>Given (the situation)</th><th>When (the action)</th><th>Then (what should happen)</th><th>And (one more check)</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag mint">R4</span><br><b>Eligibility gate</b></td><td>A campaign needs 50K+ Instagram followers and the creator has 48.2K</td><td>They open the feed</td><td>The campaign isn't in "You qualify". It shows in "Not eligible yet" as "1.8K followers short", and Apply is disabled</td><td>If the brand invites them, Apply is enabled for that campaign only</td></tr>
+        <tr><td><span class="tag mint">R8</span><br><b>Decision deadline</b></td><td>An application is still undecided 5 days after the campaign closes</td><td>The nightly job runs</td><td>The status becomes "Closed: brand didn't decide" and the creator is notified within 1 hour</td><td>The brand's response rate updates on its next campaign card</td></tr>
+      </tbody></table></div>
+
+    <h3 id="s3-states">Application states</h3>
+    <div class="tw minw-720 rv"><table>
+      <thead><tr><th>State</th><th>What it means</th><th>What happens next</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag mint">1 · Applied</span></td><td>The creator has sent the application</td><td>The brand shortlists or declines by the decide-by date</td></tr>
+        <tr><td><span class="tag mint">2 · Shortlisted</span></td><td>The brand has picked the creator</td><td>The creator connects Instagram to verify their numbers</td></tr>
+        <tr><td><span class="tag mint">3 · Verified</span></td><td>The numbers have been checked</td><td>The brand sends the offer</td></tr>
+        <tr><td><span class="tag mint">4 · Offered</span></td><td>An offer at the creator's quote</td><td>The creator has 3 days to accept</td></tr>
+        <tr><td><span class="tag violet">5 · Accepted</span></td><td>The deal is done</td><td>Contact details unlock</td></tr>
+        <tr><td><span class="tag tomato">Exit · Declined</span></td><td>The brand said no, with a reason</td><td>Ends. The creator sees the reason</td></tr>
+        <tr><td><span class="tag tomato">Exit · Closed: brand didn't decide</span></td><td>No decision 5 days after closing</td><td>Ends. Counts against the brand's response rate</td></tr>
+        <tr><td><span class="tag tomato">Exit · Withdrawn</span></td><td>The creator pulled out</td><td>If they were shortlisted, the slot reopens and the brand is told</td></tr>
+        <tr><td><span class="tag tomato">Exit · Offer expired or declined</span></td><td>No answer in 3 days, or the creator said no</td><td>The slot reopens for the brand</td></tr>
+      </tbody></table></div>
+
+    <h3>Notifications</h3>
+    <p class="small" style="margin:-4px 0 12px;color:var(--ink-2)">Grouped by who gets it: <span class="tag tomato">Creator</span> <span class="tag mint">Brand</span> <span class="tag violet">Both</span></p>
+    <div class="tw minw-720 rv"><table>
+      <thead><tr><th>Event</th><th>Who</th><th>Channel</th></tr></thead>
+      <tbody>
+        <tr class="nt-c"><td>Applied (with decide-by date)</td><td><span class="tag tomato">Creator</span></td><td><span class="tag">In-app</span> <span class="tag">Email</span></td></tr>
+        <tr class="nt-c"><td>Shortlisted, verify Instagram</td><td><span class="tag tomato">Creator</span></td><td><span class="tag">Push</span> <span class="tag">Email</span></td></tr>
+        <tr class="nt-c"><td>Declined with reason</td><td><span class="tag tomato">Creator</span></td><td><span class="tag">In-app</span> <span class="tag">Email</span></td></tr>
+        <tr class="nt-c"><td>Offer sent (+ reminder with 24 h left)</td><td><span class="tag tomato">Creator</span></td><td><span class="tag">Push</span> <span class="tag">Email</span></td></tr>
+        <tr class="nt-c"><td>Invite</td><td><span class="tag tomato">Creator</span></td><td><span class="tag">Push</span></td></tr>
+        <tr class="nt-b"><td>Decide-by reminder (2 days, 1 day)</td><td><span class="tag mint">Brand</span></td><td><span class="tag">Email</span></td></tr>
+        <tr class="nt-x"><td>Auto-closed</td><td><span class="tag violet">Both</span></td><td><span class="tag">In-app</span> <span class="tag">Email</span> <span class="tag">within 1 h</span></td></tr>
+      </tbody></table></div>
+
+    <h3 id="s3-edge">Edge cases: what if…</h3>
+    <figure class="fig rv dk" style="background:#15181D;border-color:#2E343D">
+      <svg viewBox="0 0 1000 325" role="img" aria-label="Edge cases as an 8-step path"><path d="M40 305 V70 A122.5 55 0 0 1 285 70 V250 A122.5 55 0 0 0 530 250 V70 A122.5 55 0 0 1 775 70 V250 V305" fill="none" stroke="#F5F4EF" stroke-opacity=".85" stroke-width="5" stroke-linecap="round"/><circle cx="40" cy="250" r="19" fill="#E3A93B" stroke="#15181D" stroke-width="3"/><text x="40" y="255" text-anchor="middle" style="font:700 13px var(--f-body);fill:#15181D">01</text><text class="d-t" x="70" y="200">Creator doesn't know rate</text><text class="d-s" x="70" y="219">We suggest a range by size</text><text class="d-s" x="70" y="236">and niche. Card says if the</text><text class="d-s" x="70" y="253">budget covers it: yes/close/no</text><circle cx="40" cy="70" r="19" fill="#E3A93B" stroke="#15181D" stroke-width="3"/><text x="40" y="75" text-anchor="middle" style="font:700 13px var(--f-body);fill:#15181D">02</text><text class="d-t" x="70" y="66">Shortlisted by 5 brands</text><text class="d-s" x="70" y="85">Each offer has a 3-day window.</text><text class="d-s" x="70" y="102">Marking "unavailable"</text><text class="d-s" x="70" y="119">pauses new invites</text><circle cx="285" cy="70" r="19" fill="#E3A93B" stroke="#15181D" stroke-width="3"/><text x="285" y="75" text-anchor="middle" style="font:700 13px var(--f-body);fill:#15181D">03</text><text class="d-t" x="315" y="66">Brand's first campaign</text><text class="d-s" x="315" y="85">Shows "New brand" instead</text><text class="d-s" x="315" y="102">of a response record</text><circle cx="285" cy="250" r="19" fill="#E3A93B" stroke="#15181D" stroke-width="3"/><text x="285" y="255" text-anchor="middle" style="font:700 13px var(--f-body);fill:#15181D">04</text><text class="d-t" x="315" y="200">Careless follower minimum</text><text class="d-s" x="315" y="219">Brand can still invite a</text><text class="d-s" x="315" y="236">strong creator who just</text><text class="d-s" x="315" y="253">misses it</text><circle cx="530" cy="250" r="19" fill="#E3A93B" stroke="#15181D" stroke-width="3"/><text x="530" y="255" text-anchor="middle" style="font:700 13px var(--f-body);fill:#15181D">05</text><text class="d-t" x="560" y="200">Brand-new creator</text><text class="d-s" x="560" y="219">Neutral track-record score;</text><text class="d-s" x="560" y="236">still shown when they qualify</text><circle cx="530" cy="70" r="19" fill="#E3A93B" stroke="#15181D" stroke-width="3"/><text x="530" y="75" text-anchor="middle" style="font:700 13px var(--f-body);fill:#15181D">06</text><text class="d-t" x="560" y="66">Quote above the budget</text><text class="d-s" x="560" y="85">Allowed, with a warning</text><text class="d-s" x="560" y="102">before sending</text><circle cx="775" cy="70" r="19" fill="#E3A93B" stroke="#15181D" stroke-width="3"/><text x="775" y="75" text-anchor="middle" style="font:700 13px var(--f-body);fill:#15181D">07</text><text class="d-t" x="805" y="66">Brief edited after launch</text><text class="d-s" x="805" y="85">New rules apply only to</text><text class="d-s" x="805" y="102">new applications</text><circle cx="775" cy="250" r="19" fill="#E3A93B" stroke="#15181D" stroke-width="3"/><text x="775" y="255" text-anchor="middle" style="font:700 13px var(--f-body);fill:#15181D">08</text><text class="d-t" x="805" y="200">Instagram link expires</text><text class="d-s" x="805" y="219">Last verified numbers stay,</text><text class="d-s" x="805" y="236">shown with their date</text></svg>
+    </figure>
+    <h3>Risks, and what I'd do about each</h3>
+    <figure class="fig rv dk" style="background:#15181D;border-color:#2E343D">
+      <svg viewBox="0 0 1000 445" role="img" aria-label="Risks as a 7-step path"><path d="M40 430 V190 A160 60 0 0 1 360 190 V370 A160 60 0 0 0 680 370 V190" fill="none" stroke="#F5F4EF" stroke-opacity=".85" stroke-width="5" stroke-linecap="round"/><circle cx="40" cy="370" r="19" fill="#F28B82" stroke="#15181D" stroke-width="3"/><text x="40" y="375" text-anchor="middle" style="font:700 13px var(--f-body);fill:#15181D">01</text><text class="d-t" x="70" y="320">Score ignores content style</text><text class="d-s" x="70" y="339">Brands pick on look and tone. Latest posts</text><text class="d-s" x="70" y="356">sit next to the score. If the week-2</text><text class="d-s" x="70" y="373">back-test fails, drop the number.</text><circle cx="40" cy="190" r="19" fill="#F28B82" stroke="#15181D" stroke-width="3"/><text x="40" y="195" text-anchor="middle" style="font:700 13px var(--f-body);fill:#15181D">02</text><text class="d-t" x="70" y="186">Limited Instagram data</text><text class="d-s" x="70" y="205">Self-reported for all; verify only the</text><text class="d-s" x="70" y="222">~6 shortlisted per campaign. Ops checks</text><text class="d-s" x="70" y="239">the ~15% who can't connect: ~16 h/mo (A)</text><circle cx="200" cy="130" r="19" fill="#F28B82" stroke="#15181D" stroke-width="3"/><text x="200" y="135" text-anchor="middle" style="font:700 13px var(--f-body);fill:#15181D">03</text><text class="d-t" x="200" y="60" text-anchor="middle">Top creators get flooded</text><text class="d-s" x="200" y="79" text-anchor="middle">Invite cap + availability toggle. Watch</text><text class="d-s" x="200" y="96" text-anchor="middle">offer acceptance and win concentration</text><circle cx="360" cy="190" r="19" fill="#F28B82" stroke="#15181D" stroke-width="3"/><text x="360" y="195" text-anchor="middle" style="font:700 13px var(--f-body);fill:#15181D">04</text><text class="d-t" x="390" y="186">Deals move off the platform</text><text class="d-s" x="390" y="205">Contact details stay hidden until</text><text class="d-s" x="390" y="222">an offer is accepted</text><circle cx="360" cy="370" r="19" fill="#F28B82" stroke="#15181D" stroke-width="3"/><text x="360" y="375" text-anchor="middle" style="font:700 13px var(--f-body);fill:#15181D">05</text><text class="d-t" x="390" y="320">Fake followers, engagement pods</text><text class="d-s" x="390" y="339">Verified at shortlist; Ops reviews</text><text class="d-s" x="390" y="356">engagement unusually high for the size</text><circle cx="680" cy="370" r="19" fill="#F28B82" stroke="#15181D" stroke-width="3"/><text x="680" y="375" text-anchor="middle" style="font:700 13px var(--f-body);fill:#15181D">06</text><text class="d-t" x="710" y="320">Brands think demand dropped</text><text class="d-s" x="710" y="339">Fewer applicants can look like less</text><text class="d-s" x="710" y="356">interest. Show the strong-match count.</text><circle cx="680" cy="190" r="19" fill="#F28B82" stroke="#15181D" stroke-width="3"/><text x="680" y="195" text-anchor="middle" style="font:700 13px var(--f-body);fill:#15181D">07</text><text class="d-t" x="710" y="186">New creators crowded out</text><text class="d-s" x="710" y="205">Tracked as a guardrail; hold back</text><text class="d-s" x="710" y="222">feed spots for them if needed</text></svg>
+    </figure>
+
+    <h3 id="s3-dep">Dependencies</h3>
+    <div class="grid g4">
+      <div class="card lift prose rv"><span class="label">Design</span><p class="small">How a score and reasons look on a card, label-only vs number, the brief form, the 3-step apply flow, the ranked list with posts. Tested with 5 creators and 3 brands.</p></div>
+      <div class="card lift prose rv"><span class="label">Engineering</span><p class="small">Brief and profile fields, eligibility gate, scoring rules with adjustable weights, decision deadline job, states and notifications, Instagram verification at shortlist. Meta app review starts in week 1.</p></div>
+      <div class="card lift prose rv"><span class="label">Data</span><p class="small">Real baselines, under-fill tagged by cause, back-test of the score, event tracking, campaign-level A/B design and readout.</p></div>
+      <div class="card lift prose rv"><span class="label">Ops</span><p class="small">Creator Ops owns weight tuning and verification spot-checks. Brand Partnerships recruits 30 beta brands. Support preps answers for decline reasons and auto-closes.</p></div>
+    </div>
+    <h3 id="s3-plan">Plan, and how the teams work together</h3>
+    <div class="grid g2">
+      <div class="card prose rv"><span class="label">Timeline</span>
+        <div class="tw" style="border:0;box-shadow:none;background:none"><table>
+          <thead><tr><th>When</th><th>What happens</th><th>Decision at the end</th></tr></thead>
+          <tbody>
+            <tr><td><b>Week 1</b></td><td>Real baselines. Tag last quarter's under-filled campaigns by cause. Start Meta app review.</td><td>If budget is the biggest cause, do pricing guidance first</td></tr>
+            <tr><td><b>Week 2</b></td><td>Back-test the score on past campaigns. Test the designs with 5 creators and 3 brands.</td><td>If selected creators don't score clearly higher, drop the number; keep gating and sorting</td></tr>
+            <tr><td><b>Weeks 3–8</b></td><td>Build v1 (~18 weeks of work, 3 engineers), weekly demo to Ops</td><td>Ready for a beta</td></tr>
+            <tr><td><b>Week 9</b></td><td>Beta with 30 brands</td><td>Fix what breaks</td></tr>
+            <tr><td><b>Weeks 10–17</b></td><td>Campaign-level A/B test: new campaigns are split for 8 weeks (12 if extended)</td><td>Guardrails checked weekly</td></tr>
+            <tr><td><b>~Week 20</b></td><td>Readout, once the last test campaigns are 14 days past closing (~week 24 if extended)</td><td>Roll out, extend, rework or stop</td></tr>
+          </tbody></table></div></div>
+      <div class="card prose rv"><span class="label">One question for each team</span><ul class="clean">
+        <li><b>Design:</b> how do we show a "Stretch" match without putting the creator off?</li>
+        <li><b>Engineering:</b> what Instagram data can we get for non-business accounts, and how long will Meta app review take?</li>
+        <li><b>Data:</b> is ~320 campaigns enough to detect the lift, given the real spread between campaigns?</li></ul>
+        <p class="small">Rhythm: one shared dashboard, a 30-minute weekly review with all three teams, and every decision written into this PRD.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="s4" class="band dk c-butter">
+  <div class="wrap">
+    <div class="head"><span class="eyebrow"><i></i>04 · Metrics &amp; experimentation</span><h2>Measure paid work, <span class="serif">not a ratio</span></h2>
+      <p class="lede">Five headline metrics: one North Star, one test metric, one for engagement and two for retention. Only filled slots is read inside the test; the creator metrics are read before vs after rollout, because every creator sees both kinds of campaign. Baselines are my assumptions <span class="A">A</span>; replacing them with real numbers is the first job in week 1.</p></div>
+
+    <h3 id="s4-mets">Headline metrics</h3>
+    <div class="tw minw-900 rv"><table>
+      <thead><tr><th>Type</th><th>Metric</th><th class="r">Today <span class="A">A</span></th><th class="r">Target</th><th>When we read it</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag violet">North Star</span></td><td><b>Completed paid collaborations per month</b><br><span class="small">What the marketplace exists to produce, and what commission is earned on. 160 campaigns × 4.0 filled slots = 640 accepted offers; ~40 a month don't end in completed content, which is why it's ~600, not 640.</span></td><td class="r">~600</td><td class="r">~645–720</td><td>Monthly, after rollout</td></tr>
+        <tr class="win"><td><span class="tag violet">Primary · test</span></td><td><b>Filled slots per campaign</b><br><span class="small">Accepted offers ÷ campaigns, 14 days after close. Moves within a test window and leads straight to the North Star.</span></td><td class="r">4.0 of ~6</td><td class="r">4.3–4.8</td><td>End of the 8-week test</td></tr>
+        <tr><td><span class="tag butter">Engagement</span></td><td><b>Weekly active creators</b><br><span class="small">Share of creators who open their feed at least once a week. Shows whether a feed of campaigns they can win brings them back, even when they apply less.</span></td><td class="r">~40%</td><td class="r">45%</td><td>Weekly, before vs after rollout</td></tr>
+        <tr><td><span class="tag mint">Retention · creator</span></td><td><b>Creator return rate</b><br><span class="small">Creators who apply in one month and again the next. Every creator sees both test and control campaigns, so the test can't split this; I read it before vs after rollout, as directional.</span></td><td class="r">48%</td><td class="r">55%</td><td>Monthly</td></tr>
+        <tr><td><span class="tag mint">Retention · brand</span></td><td><b>Brand repeat campaign rate</b><br><span class="small">Brands that launch another campaign within 90 days. Where most of the money is.</span></td><td class="r">35%</td><td class="r">42%</td><td>About 3 months after the test</td></tr>
+      </tbody></table></div>
+    <p class="small muted">Diagnostics I'd watch but not target: win rate per application · days from launch to first shortlist (6 → under 3) · % of applications given a reasoned brand decision before auto-close (80%) · screenshot requests per campaign.</p>
+    <div class="callout rv"><b>Why win rate isn't the primary metric:</b> blocking applications that would have lost removes them from the bottom of the ratio, so win rate rises even if no extra creator gets paid. Filled slots can only go up if more work actually happens.</div>
+
+    <h3 id="s4-target">Is +0.6 realistic? A range, not a promise</h3>
+    <div class="grid g2">
+      <div class="card prose rv"><span class="label">The ceiling</span>
+        <p class="small">About <b>2 of ~6 slots</b> go empty per campaign today <span class="A">A</span>. Matching fully addresses slow decisions (~35% of under-fill) and partly addresses too few qualified creators (~25%). It doesn't fix low budgets or offer declines.</p>
+        <p class="small">So matching can reach roughly <b>0.7–1.0</b> of those 2 empty slots. A lift of +0.6 would mean fixing most of what's reachable.</p></div>
+      <div class="card prose rv"><span class="label">So I plan for a range</span>
+        <p class="small"><b>Expected lift: +0.3 to +0.8 filled slots</b> (4.3–4.8). +0.6 is only realistic if week 1 shows slow decisions are the biggest cause of under-fill.</p>
+        <p class="small">If the week-1 split shows budget or declines dominate, I'd lower the expectation before building, not after the test.</p></div>
+    </div>
+
+    <h3 id="s4-guard">Guardrails &amp; sizing</h3>
+    <div class="grid g2">
+      <div class="card prose rv"><span class="label">Top 3 guardrails (must not get worse)</span><ul class="clean small">
+        <li><b>Applications per campaign</b> stay at 25+</li>
+        <li><b>Offer acceptance rate</b> drops by no more than 5 points</li>
+        <li><b>Win concentration:</b> share of wins going to the top 10% of creators rises by no more than 5 points</li></ul>
+        <p class="small muted">Also tracked: new creators' share of applications, average fee per deliverable, share of accepted offers that end in completed content.</p></div>
+      <div class="card prose rv"><span class="label">Rough sizing <span class="A">A</span></span>
+        <p class="small">Only count slots that would otherwise go unfilled. ~160 campaigns a month × +0.3 to +0.8 filled slots ≈ 50–130 more filled slots, or ~45–120 completed collaborations after the usual drop-off (the North Star target of ~645–720). At ~₹28K actually paid per slot (not budget), that's ≈ ₹13–34L more completed work a month.</p>
+        <p class="small">At 15% commission: <b>≈ ₹2–5L more a month</b> (~₹3.5L at the +0.55 rollout bar). Partly-filled campaigns already earn commission, which is why this is per slot, not per campaign.</p></div>
+    </div>
+
+    <h3 id="s4-ab">The A/B test, randomised by campaign</h3>
+
+    <div class="card prose rv" style="margin-bottom:16px"><span class="label">In plain words: what we're testing</span>
+      <p><b>The question:</b> if creators and brands can both see who fits a campaign, do more creators end up with paid work?</p>
+      <p><b>How:</b> for 8 weeks, every new campaign is randomly put into one of two groups when it launches, like a coin flip.</p>
+      <ul class="clean">
+        <li><b>Test group (the new way):</b> only creators who meet the requirements can apply. Each sees a match score with the reason. The brand gets a ranked list, must decide within 5 days, and can invite strong creators who didn't apply.</li>
+        <li><b>Control group (today's way):</b> the campaign runs exactly as it does now. Anyone can apply, campaigns show newest first, there's no score and no deadline.</li>
+      </ul>
+      <p><b>What we compare:</b> how many of each campaign's slots end up filled by a creator who accepted an offer. <i>Example:</i> Kora Botanics wants 6 creators. Campaigns like it fill about 4 slots today. If test campaigns fill about 4.6 on average and control campaigns about 4.0, the new way gets more creators paid. Across ~160 campaigns in each group, a gap of about half a slot (+0.55) or more is big enough to trust.</p>
+      <p><b>Why split campaigns, not people:</b> a campaign gets the new flow on both sides at once, so the creator applying and the brand choosing see the same thing. If we split creators instead, a brand would see a mix of old and new applicants, and we couldn't tell whether the brand-side changes helped.</p>
+    </div>
+
+    <figure class="fig rv" style="margin-bottom:16px">
+      <svg viewBox="0 0 1000 480" role="img" aria-label="A/B test as a tree: campaigns split into test and control, measured, then five possible decisions">
+        <rect x="330" y="14" width="340" height="50" rx="25" style="fill:var(--ink)"/><text class="d-t" x="500" y="36" text-anchor="middle" style="fill:var(--paper)">All new campaigns, 8 weeks</text><text class="d-s" x="500" y="54" text-anchor="middle" style="fill:var(--paper);opacity:.8">~320 campaigns, split 50/50 at launch</text><path d="M500 64V88M330 88H670M330 88V108M670 88V108" fill="none" stroke="var(--ink-3)" stroke-width="1.5"/><rect x="170" y="108" width="320" height="74" rx="12" style="fill:var(--mint-soft);stroke:var(--mint);stroke-width:1.5"/><text class="d-l" x="186" y="130">TEST · ~160 CAMPAIGNS</text><text class="d-t" x="186" y="152">Full experience on both sides</text><text class="d-s" x="186" y="170">Gating, ranked lists, deadline, capped invites</text><rect x="510" y="108" width="320" height="74" rx="12" style="fill:var(--surface-2);stroke:var(--line-strong);stroke-width:1.5"/><text class="d-l" x="526" y="130">CONTROL · ~160 CAMPAIGNS</text><text class="d-t" x="526" y="152">Today's flow, unchanged</text><text class="d-s" x="526" y="170">Same weeks, same kinds of brands</text><path d="M330 182V202M670 182V202M330 202H670M500 202V222" fill="none" stroke="var(--ink-3)" stroke-width="1.5"/><rect x="260" y="222" width="480" height="58" rx="12" style="fill:var(--surface-2);stroke:var(--line-strong);stroke-width:1.5"/><text class="d-t" x="500" y="246" text-anchor="middle">Measure filled slots per campaign, 14 days after close</text><text class="d-s" x="500" y="266" text-anchor="middle">Test vs control, at campaign level · guardrails checked every week</text><path d="M500 280V304M105 304H893M105 304V326M302 304V326M499 304V326M696 304V326M893 304V326" fill="none" stroke="var(--ink-3)" stroke-width="1.5"/><rect x="10" y="326" width="190" height="118" rx="12" style="fill:var(--mint-soft);stroke:var(--mint);stroke-width:1.5"/><text class="d-l" x="24" y="348">RESULT</text><text class="d-t" x="24" y="370">+0.55 or more,</text><text class="d-t" x="24" y="388">guardrails fine</text><text class="d-s" x="24" y="412">→ Roll out to everyone</text><rect x="207" y="326" width="190" height="118" rx="12" style="fill:var(--butter-soft);stroke:var(--butter);stroke-width:1.5"/><text class="d-l" x="221" y="348">RESULT</text><text class="d-t" x="221" y="370">Positive, but only</text><text class="d-t" x="221" y="388">+0.3 to +0.55</text><text class="d-s" x="221" y="412">→ Extend to 12 weeks;</text><text class="d-s" x="221" y="429">below +0.45: no clear lift</text><rect x="404" y="326" width="190" height="118" rx="12" style="fill:var(--butter-soft);stroke:var(--butter);stroke-width:1.5"/><text class="d-l" x="418" y="348">RESULT</text><text class="d-t" x="418" y="370">Lift, but offers declined</text><text class="d-t" x="418" y="388">or wins concentrated</text><text class="d-s" x="418" y="412">→ Tighten the invite cap,</text><text class="d-s" x="418" y="429">add availability, retest</text><rect x="601" y="326" width="190" height="118" rx="12" style="fill:var(--butter-soft);stroke:var(--butter);stroke-width:1.5"/><text class="d-l" x="615" y="348">RESULT</text><text class="d-t" x="615" y="370">Lift, but too few</text><text class="d-t" x="615" y="388">applicants per campaign</text><text class="d-s" x="615" y="412">→ Make the block a warning</text><text class="d-s" x="615" y="429">for near-misses, retest</text><rect x="798" y="326" width="190" height="118" rx="12" style="fill:var(--tomato-soft);stroke:var(--tomato);stroke-width:1.5"/><text class="d-l" x="812" y="348">RESULT</text><text class="d-t" x="812" y="370">No lift</text><text class="d-s" x="812" y="412">→ Check the week-1 budget</text><text class="d-s" x="812" y="429">split; reweight or stop</text>
+        <text class="d-s" x="10" y="472">Green = ship it. Yellow = learn more or adjust, then retest. Red = rethink. Expected lift is +0.3 to +0.8; +0.55 is the smallest lift 8 weeks can confirm.</text>
+      </svg>
+    </figure>
+    <div class="grid">
+      <div class="card rv"><span class="label">Test details</span><dl class="kv" style="margin-top:8px">
+        <dt>Hypothesis</dt><dd>When both sides see fit (gating, ranking with reasons, a decision deadline, capped invites), campaigns fill more slots than with today's flow.</dd>
+        <dt>Unit</dt><dd><b>Campaigns</b>, split 50/50 at launch. Test campaigns get the full experience on <b>both</b> sides; control campaigns run as today.</dd>
+        <dt>Primary metric</dt><dd>Filled slots per campaign, 14 days after close.</dd>
+        <dt>Length &amp; power</dt><dd>8 weeks ≈ 320 campaigns <span class="A">A</span>. With a spread of about 1.8 slots between campaigns <span class="A">A</span>, the smallest lift we can reliably detect is about <b>+0.55</b>. Extending to 12 weeks (~480 campaigns) brings that down to about +0.45.</dd>
+        <dt>If extended</dt><dd>Roll out at +0.45 or more at 12 weeks. Below that, I treat it as no clear lift and go back to the week-1 under-fill split, rather than extending again.</dd>
+        <dt>Rollout bar</dt><dd>Expected +0.3 to +0.8. <b>Roll out at +0.55 or more</b>, the smallest lift 8 weeks can confirm.</dd>
+        <dt>Bundled</dt><dd>Gating, ranking, deadline and invites ship together, so a win won't say which one mattered. A follow-up creator-feed test would separate ranking from gating.</dd>
+        <dt>Analysis</dt><dd>At campaign level, so repeat applications from the same creator don't inflate the result. Guardrails that involve creators (new creators' share, win concentration) compare applications to test vs control campaigns, clustered by creator.</dd>
+        <dt>Spillover</dt><dd>Creators see test and control campaigns in the same feed. I'd check control campaigns' application volume didn't fall.</dd>
+      </dl></div>
+      
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="s5" class="band c-butter">
+  <div class="wrap">
+    <div class="head"><span class="eyebrow"><i></i>05 · Trade-offs &amp; prioritisation</span><h2>What I <span class="serif">didn't</span> build, and why</h2>
+      <p class="lede">A team only has so much time. Here's what I left out, where the work would go, and what I'd do if the team were half the size.</p></div>
+
+    <h3 id="s5-not">Left out on purpose</h3>
+    <div class="grid g3">
+      <div class="card lift prose rv"><span class="label">AI matching</span><p class="small">We don't yet have enough past results to teach an AI what a good match looks like. Simple rules test the idea now, anyone can understand them, and they collect the data an AI would need later.</p></div>
+      <div class="card lift prose rv"><span class="label">Chat and price negotiation</span><p class="small">Someone would have to watch the chats, and it makes it easy to take the deal outside Tessera. Whether the price is fixed at the creator's quote is a separate pricing decision.</p></div>
+      <div class="card lift prose rv"><span class="label">Paid boosts for creators</span><p class="small">It would charge the creators who are already struggling, and brands would stop trusting the ranking.</p></div>
+      <div class="card lift prose rv"><span class="label">Content approval workflow</span><p class="small">This happens after creators are chosen, so it doesn't help campaigns fill up.</p></div>
+      <div class="card lift prose rv"><span class="label">Payout tracker</span><p class="small">Important, and next in line. But finance first needs to agree a deadline for brands to approve content.</p></div>
+      <div class="card lift prose rv"><span class="label">v1.1 extras</span><p class="small">Live count of matching creators, a low-budget warning, "tell me when I qualify", automatic Instagram sync, YouTube. Only if the first version works.</p></div>
+    </div>
+
+    <h3 id="s5-road">Where the work goes</h3>
+    <div class="grid g2">
+      <div class="card prose rv"><span class="label">Version 1: about 18 weeks of work <span class="A">A</span></span>
+        <p class="small" style="margin-top:6px">One "week of work" = one engineer for one week.</p>
+        <div class="tw" style="border:0;box-shadow:none;background:none"><table>
+          <thead><tr><th>What we build</th><th class="r">Weeks</th></tr></thead>
+          <tbody>
+            <tr><td>Campaign form for brands</td><td class="r">2</td></tr>
+            <tr><td>Creator profile, with suggested prices</td><td class="r">2</td></tr>
+            <tr><td>"Can I apply?" check</td><td class="r">1.5</td></tr>
+            <tr><td>Match score that's easy to adjust</td><td class="r">3</td></tr>
+            <tr><td>Creator's feed, best match first</td><td class="r">1.5</td></tr>
+            <tr><td>Brand's ranked list, with recent posts</td><td class="r">2</td></tr>
+            <tr><td>Decisions, reasons, deadline and alerts</td><td class="r">2.5</td></tr>
+            <tr><td>Checking Instagram numbers for shortlisted creators</td><td class="r">2</td></tr>
+            <tr><td>Invites, invite limits, brand track record</td><td class="r">1.5</td></tr>
+            <tr><td><b>Total</b></td><td class="r"><b>18</b></td></tr>
+          </tbody></table></div>
+        <p class="small">With 3 engineers, that's about <b>6 weeks</b>.</p></div>
+      <div class="card prose rv"><span class="label">Why matching goes first</span>
+        <div class="tw" style="border:0;box-shadow:none;background:none"><table>
+          <thead><tr><th>Idea</th><th>Who it helps</th><th class="r">Weeks</th><th>Decision</th></tr></thead>
+          <tbody>
+            <tr class="win"><td><b>Matching, version 1</b></td><td>Every campaign and every creator</td><td class="r">~18</td><td><span class="tag violet">Do now</span></td></tr>
+            <tr><td>Matching extras</td><td>Same people</td><td class="r">~10</td><td><span class="tag">Only if v1 works</span></td></tr>
+            <tr><td>Payment tracker</td><td>About 1 in 4 creators</td><td class="r">~10</td><td><span class="tag mint">Next</span></td></tr>
+            <tr><td>Faster sign-up</td><td>New sign-ups</td><td class="r">~12</td><td><span class="tag">Partly covered</span></td></tr>
+            <tr><td>Content review</td><td>Only creators already chosen</td><td class="r">~16</td><td><span class="tag">Later</span></td></tr>
+          </tbody></table></div>
+        <p class="small">Matching goes first because it helps everyone on both sides and fixes the cause behind two of the three problems. Weeks are my estimates <span class="A">A</span>.</p></div>
+    </div>
+
+    <h3 id="s5-half">If we only had half the engineers</h3>
+    <div class="card prose rv hl-card">
+      <span class="label">Half the team (1.5 engineers) for the same 6 weeks ≈ 9 weeks of work. The plan below is 9.5, so the brand's track record moves to the beta week if we run short.</span>
+      <p><b style="color:#E3A93B">I'd still build the whole loop, just simpler:</b></p>
+      <ul class="clean" style="--dot:#6FD3A8">
+        <li>Campaign form and creator profile; creators type in their own numbers (3.5 weeks)</li>
+        <li>The "Can I apply?" check that shows what's missing (1.5 weeks)</li>
+        <li>A simple ordered list with a label like "Strong match", but no number (1.5 weeks)</li>
+        <li>Brands must give a reason and decide by a date (1.5 weeks)</li>
+        <li>Invites, with a weekly limit (1 week)</li>
+        <li>The brand's track record on campaign cards, so creators can see which brands let applications close without a decision (0.5 week)</li></ul>
+      <p><b style="color:#F28B82">Dropped:</b> the 0–100 score and its breakdown · automatic Instagram checks (Ops checks only creators about to get an offer: ~4 per campaign, ~640 a month at ~7 minutes each, about 75 hours, roughly half an Ops person <span class="A">A</span>) · recent posts on the list.</p>
+      <p class="small"><b>What we lose:</b> brands get less proof, and creators see a label instead of a full explanation. That's fine for a first test, because all we need to learn is whether showing fit fills more slots.</p></div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="s7" class="band dk c-butter">
+  <div class="wrap">
+    <div class="head"><span class="eyebrow"><i></i>Bonus · Alternative I rejected</span><h2>Ops hand-picks creators for <span class="serif">every campaign</span></h2></div>
+    <div class="grid g2">
+      <div id="s7-idea" class="card lift prose rv"><span class="label">The idea</span><p>Creator Ops picks 10 creators per campaign and sends the list to the brand. Quick to start, high quality, brands love it.</p></div>
+      <div id="s7-no" class="card lift prose rv"><span class="label">Why I said no</span><ul class="clean" style="--dot:var(--tomato)"><li><b>It doesn't scale.</b> ~2 hours × 160 campaigns a month ≈ 320 hours, about 2 full-time people, growing with every campaign <span class="A">A</span>. By contrast, v1's manual checks cover only the ~15% of shortlisted creators who can't connect Instagram: ~145 checks at ~7 minutes, about 16 hours a month <span class="A">A</span>.</li><li><b>It takes choice away from creators.</b> Only creators Ops already knows get picked.</li><li><b>It hides the problem</b> instead of fixing it, and teaches us nothing.</li></ul>
+        <p>I'd keep it as a premium service for the top 20 brands, with Ops using the same scores to work faster.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section id="s8" class="band c-butter">
+  <div class="wrap">
+    <div class="head"><span class="eyebrow"><i></i>Appendix · optional</span><h2>The flow, <span class="serif">clickable</span></h2>
+      <p class="lede">The brief didn't ask for designs. I built this to check that the flow holds together end to end. Creator and brand share data, and scores use the rules above. It also shows a few v1.1 pieces (live pool count, budget warning, "notify me").</p></div>
+    <div id="s8-embed" class="embed rv">
+      <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span>Sample data · today fixed at 10 Nov 2026</span><a href="prototype.html" target="_blank" rel="noopener" style="margin-left:auto">Open full screen ↗</a></div>
+      <iframe src="prototype.html" title="Tessera clickable wireframe" loading="lazy"></iframe>
+    </div>
+    <h3 id="s8-try">How to use it</h3>
+    <figure class="fig rv">
+      <svg viewBox="0 0 1000 410" role="img" aria-label="Tree: open the wireframe, then creator side, brand side and controls, with numbered steps">
+        <rect x="380" y="16" width="240" height="48" rx="24" style="fill:var(--ink)"/><text x="500" y="45" text-anchor="middle" style="font:700 14px var(--f-body);fill:var(--paper)">Open the wireframe</text><path d="M500 64V88M170 88H830M170 88V110M500 88V110M830 88V110" fill="none" stroke="var(--ink-3)" stroke-width="1.5"/><rect x="30" y="110" width="280" height="48" rx="12" style="fill:var(--butter-soft);stroke:var(--butter);stroke-width:1.5"/><text class="d-t" x="46" y="131">Creator side</text><text class="d-s" x="46" y="148">Aanya Rao</text><path d="M46 158V344" fill="none" stroke="var(--butter)" stroke-width="1.5"/><path d="M46 208H64" fill="none" stroke="var(--butter)" stroke-width="1.5"/><rect x="64" y="180" width="246" height="56" rx="10" style="fill:var(--surface);stroke:var(--butter)"/><circle cx="86" cy="208" r="12" style="fill:#E3A93B"/><text x="86" y="212" text-anchor="middle" style="font:700 12px var(--f-body);fill:#15181D">1</text><text class="d-t" x="106" y="204">Find campaigns</text><text class="d-s" x="106" y="222">Discover → "Not eligible yet" tab</text><path d="M46 276H64" fill="none" stroke="var(--butter)" stroke-width="1.5"/><rect x="64" y="248" width="246" height="56" rx="10" style="fill:var(--surface);stroke:var(--butter)"/><circle cx="86" cy="276" r="12" style="fill:#E3A93B"/><text x="86" y="280" text-anchor="middle" style="font:700 12px var(--f-body);fill:#15181D">2</text><text class="d-t" x="106" y="272">Apply</text><text class="d-s" x="106" y="290">Monsoon Barrier Serum (score 92)</text><path d="M46 344H64" fill="none" stroke="var(--butter)" stroke-width="1.5"/><rect x="64" y="316" width="246" height="56" rx="10" style="fill:var(--surface);stroke:var(--butter)"/><circle cx="86" cy="344" r="12" style="fill:#E3A93B"/><text x="86" y="348" text-anchor="middle" style="font:700 12px var(--f-body);fill:#15181D">6</text><text class="d-t" x="106" y="340">Accept the offer</text><text class="d-s" x="106" y="358">Home → accept it in Applications</text><rect x="360" y="110" width="280" height="48" rx="12" style="fill:var(--mint-soft);stroke:var(--mint);stroke-width:1.5"/><text class="d-t" x="376" y="131">Brand side</text><text class="d-s" x="376" y="148">Kora Botanics</text><path d="M376 158V344" fill="none" stroke="var(--mint)" stroke-width="1.5"/><path d="M376 208H394" fill="none" stroke="var(--mint)" stroke-width="1.5"/><rect x="394" y="180" width="246" height="56" rx="10" style="fill:var(--surface);stroke:var(--mint)"/><circle cx="416" cy="208" r="12" style="fill:#1F7A5C"/><text x="416" y="212" text-anchor="middle" style="font:700 12px var(--f-body);fill:#fff">3</text><text class="d-t" x="436" y="204">Review & shortlist</text><text class="d-s" x="436" y="222">Campaign tab, ranked by score</text><path d="M376 276H394" fill="none" stroke="var(--mint)" stroke-width="1.5"/><rect x="394" y="248" width="246" height="56" rx="10" style="fill:var(--surface);stroke:var(--mint)"/><circle cx="416" cy="276" r="12" style="fill:#1F7A5C"/><text x="416" y="280" text-anchor="middle" style="font:700 12px var(--f-body);fill:#fff">4</text><text class="d-t" x="436" y="272">Invite (optional)</text><text class="d-s" x="436" y="290">Suggested: strong non-applicants</text><path d="M376 344H394" fill="none" stroke="var(--mint)" stroke-width="1.5"/><rect x="394" y="316" width="246" height="56" rx="10" style="fill:var(--surface);stroke:var(--mint)"/><circle cx="416" cy="344" r="12" style="fill:#1F7A5C"/><text x="416" y="348" text-anchor="middle" style="font:700 12px var(--f-body);fill:#fff">5</text><text class="d-t" x="436" y="340">Send the offer</text><text class="d-s" x="436" y="358">Shortlist tab → "Send offers"</text><rect x="690" y="110" width="280" height="48" rx="12" style="fill:var(--surface-2);stroke:var(--line-strong);stroke-width:1.5"/><text class="d-t" x="706" y="131">Controls</text><text class="d-s" x="706" y="148">top of the wireframe</text><path d="M706 158V344" fill="none" stroke="var(--line-strong)" stroke-width="1.5"/><path d="M706 208H724" fill="none" stroke="var(--line-strong)" stroke-width="1.5"/><rect x="724" y="180" width="246" height="56" rx="10" style="fill:var(--surface);stroke:var(--line-strong)"/><circle cx="746" cy="208" r="12" style="fill:#4A5360"/><text x="746" y="212" text-anchor="middle" style="font:700 12px var(--f-body);fill:#fff">⇄</text><text class="d-t" x="766" y="204">Switch sides</text><text class="d-s" x="766" y="222">Click Creator or Brand in the top bar</text><path d="M706 276H724" fill="none" stroke="var(--line-strong)" stroke-width="1.5"/><rect x="724" y="248" width="246" height="56" rx="10" style="fill:var(--surface);stroke:var(--line-strong)"/><circle cx="746" cy="276" r="12" style="fill:#4A5360"/><text x="746" y="280" text-anchor="middle" style="font:700 12px var(--f-body);fill:#fff">?</text><text class="d-t" x="766" y="272">Demo script</text><text class="d-s" x="766" y="290">These steps, inside the wireframe</text><path d="M706 344H724" fill="none" stroke="var(--line-strong)" stroke-width="1.5"/><rect x="724" y="316" width="246" height="56" rx="10" style="fill:var(--surface);stroke:var(--line-strong)"/><circle cx="746" cy="344" r="12" style="fill:#4A5360"/><text x="746" y="348" text-anchor="middle" style="font:700 12px var(--f-body);fill:#fff">↺</text><text class="d-t" x="766" y="340">Reset demo</text><text class="d-s" x="766" y="358">Start again from scratch</text>
+        <text class="d-s" x="30" y="398">Follow the numbers 1 → 6: start as the creator (1–2), switch to the brand (3–5), then switch back to the creator (6). About 3 minutes.</text>
+      </svg>
+    </figure>
+    <div class="card prose rv"><span class="label">How it works</span><ul class="clean">
+      <li><b>Two sides, one switch.</b> The bar at the top has "Creator · Aanya Rao" and "Brand · Kora Botanics". Click either to change sides.</li>
+      <li><b>Shared data.</b> Both sides use the same sample data, so applying as the creator makes her appear in the brand's list, and the brand's offer shows up for the creator.</li>
+      <li><b>Same rules as above.</b> Scores, labels and reasons come from the match-score rules in the Feature section.</li>
+      <li><b>Help is built in.</b> "Demo script" opens these steps inside the wireframe; "Reset demo" starts over.</li>
+      <li><b>Nothing is sent anywhere.</b> Your clicks are saved only in your browser, and "today" is fixed at 10 Nov 2026.</li>
+      <li><b>Extra:</b> as the brand, Overview → New campaign. Change the budget or audience and watch the count of matching creators change (a later-version idea).</li>
+    </ul></div>
+  </div>
+</section>
+
+<footer><div class="wrap">Tessera is fictional. All brands, creators and figures are illustrative; values marked <span class="A">A</span> are assumptions.</div></footer>
+
+<script>
+(function(){
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function countTo(el,to,dur){ const from=+el.textContent||0, t0=performance.now(); (function f(t){ const k=Math.min(1,(t-t0)/dur); el.textContent=Math.round(from+(to-from)*(1-Math.pow(1-k,3))); if(k<1) requestAnimationFrame(f); })(t0); }
+
+  /* progress bar */
+  const pb=document.getElementById('progress');
+  const onScroll=()=>{ const h=document.documentElement; const p=h.scrollTop/(h.scrollHeight-h.clientHeight||1); pb.style.transform='scaleX('+Math.min(1,Math.max(0,p))+')'; };
+  addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+  /* gentle reveal, below the first screen only */
+  const vh=innerHeight; const hidden=[];
+  document.querySelectorAll('.rv').forEach(el=>{ if(el.getBoundingClientRect().top>vh*0.95 && !reduce){ el.classList.add('pre'); hidden.push(el); } });
+  const grow=[...document.querySelectorAll('.gw')].filter(el=>el.getBoundingClientRect().top>vh && !reduce);
+  grow.forEach(el=>{ el.dataset.w=el.style.width||''; el.style.width='0'; });
+  const counts=[...document.querySelectorAll('.count')].filter(el=>el.getBoundingClientRect().top>vh && !reduce);
+  if('IntersectionObserver' in window){
+    const io=new IntersectionObserver(es=>{ es.forEach(e=>{ if(!e.isIntersecting) return; const el=e.target; io.unobserve(el);
+      if(el.classList.contains('pre')) requestAnimationFrame(()=>el.classList.remove('pre'));
+      el.querySelectorAll && el.querySelectorAll('.gw').forEach(g=>{ if(grow.includes(g)) setTimeout(()=>{ g.style.width=g.dataset.w; },200); });
+      if(grow.includes(el)) el.style.width=el.dataset.w;
+      if(el.classList.contains('count')){ const to=+el.dataset.to, suf=el.dataset.suf||''; const t0=performance.now(); (function f(t){ const k=Math.min(1,(t-t0)/900); el.textContent=Math.round(to*(1-Math.pow(1-k,3)))+suf; if(k<1) requestAnimationFrame(f); })(t0); }
+    }); },{rootMargin:'0px 0px -8% 0px'});
+    hidden.forEach(el=>io.observe(el)); grow.forEach(el=>io.observe(el)); counts.forEach(el=>io.observe(el));
+  } else { hidden.forEach(el=>el.classList.remove('pre')); grow.forEach(g=>g.style.width=g.dataset.w); }
+
+  /* nav: active pill, sub-section menus, phone menu */
+  const nav=document.getElementById('nav'), menuBtn=document.getElementById('menuBtn');
+  const pills=[...nav.querySelectorAll('.pill')];
+  const map=new Map(pills.map(a=>[a.getAttribute('href').slice(1),a]));
+  map.set('stmt',map.get('s1'));
+  menuBtn.addEventListener('click',()=>{ const o=nav.classList.toggle('open'); menuBtn.setAttribute('aria-expanded',o); });
+  nav.querySelectorAll('.links a').forEach(a=>a.addEventListener('click',()=>{ nav.classList.remove('open'); menuBtn.setAttribute('aria-expanded','false'); setTimeout(()=>a.blur(),0); }));
+  addEventListener('keydown',e=>{ if(e.key==='Escape'&&nav.classList.contains('open')){ nav.classList.remove('open'); menuBtn.setAttribute('aria-expanded','false'); menuBtn.focus(); } });
+  if('IntersectionObserver' in window){
+    const io2=new IntersectionObserver(es=>{ es.forEach(e=>{ if(!e.isIntersecting) return; const a=map.get(e.target.id); if(!a) return; pills.forEach(l=>l.classList.toggle('on',l===a)); }); },{rootMargin:'-30% 0px -65% 0px'});
+    document.querySelectorAll('section[id]').forEach(s=>io2.observe(s));
+  }
+
+  /* playground */
+  const st={gate:1,niche:30,aud:77,eng:153,bud:15,rel:4.44};
+  const RC=389.6, ring=document.getElementById('pgRing'), out=document.getElementById('pgScore');
+  const NICHE_TXT={30:'is your main niche',22:'is your second niche',10:'is close to your niche',0:'is outside your niches'};
+  function calc(){
+    const aud=30*st.aud/100, eng=20*Math.min(1,(st.eng/100)/1.6);
+    const parts=[['Niche',st.niche,30],['Audience',aud,30],['Engagement',eng,20],['Budget',st.bud,15],['Track record',st.rel,5]];
+    const total=Math.round(parts.reduce((s,p)=>s+p[1],0));
+    parts.forEach((p,i)=>{ const r=p[1]/p[2]; const b=document.getElementById('b'+(i+1)); b.style.width=(st.gate?r*100:0)+'%'; b.classList.toggle('weak',r<.6); document.getElementById('v'+(i+1)).textContent=Math.round(p[1])+'/'+p[2]; });
+    const lbl=document.getElementById('pgLabel'), sub=document.getElementById('pgSub'), say=document.getElementById('pgSay');
+    if(!st.gate){ ring.style.strokeDashoffset=RC; countTo(out,0,500); setTimeout(()=>out.textContent='–',520); lbl.textContent='Not eligible yet'; sub.textContent='Moved to its own tab. She can\'t apply unless the brand invites her, but sees the exact gap.'; say.textContent='What the creator reads: “Needs 50K+ Instagram followers. You have 48.2K, 1.8K to go.”'; return; }
+    ring.style.strokeDashoffset=(RC*(1-total/100)).toFixed(1);
+    ring.style.stroke= total>=80?'#6FD3A8':total>=65?'#E3A93B':'#F2C46B';
+    countTo(out,total,700);
+    if(total>=80){ lbl.textContent='Strong match'; sub.textContent='Shown first in her feed and near the top of the brand\'s list'; }
+    else if(total>=65){ lbl.textContent='Good match'; sub.textContent='In her feed, below the strong matches'; }
+    else { lbl.textContent='Stretch'; sub.textContent='Still visible, clearly labelled, so she decides if it\'s worth her time'; }
+    const weakest=parts.slice().sort((x,y)=>x[1]/x[2]-y[1]/y[2])[0];
+    const best=st.niche>=22?`Skincare ${NICHE_TXT[st.niche]}.`:st.bud===15?'The budget covers your rate.':`Your engagement is ${(st.eng/100).toFixed(1)}× typical.`;
+    say.textContent=`What the creator reads: “${best} ${weakest[1]/weakest[2]<.95?'Weakest point: '+weakest[0].toLowerCase()+'.':'No weak spots.'}”`;
+  }
+  document.querySelectorAll('.seg').forEach(g=>g.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); st[g.id]=+b.dataset.v; calc(); }));
+  const aud=document.getElementById('aud'), eng=document.getElementById('eng');
+  aud.addEventListener('input',()=>{ st.aud=+aud.value; document.getElementById('audO').textContent=aud.value+'%'; calc(); });
+  eng.addEventListener('input',()=>{ st.eng=+eng.value; document.getElementById('engO').textContent=(eng.value/100).toFixed(1).replace(/\.0$/,'')+'×'; calc(); });
+  const pg=document.querySelector('.play');
+  if('IntersectionObserver' in window && !reduce){ const io3=new IntersectionObserver(es=>{ if(es[0].isIntersecting){ io3.disconnect(); setTimeout(calc,300); } },{rootMargin:'0px 0px -25% 0px'}); io3.observe(pg); } else calc();
+  /* goals reveal */
+  const gng=document.querySelector('.gng');
+  if(gng && !reduce && 'IntersectionObserver' in window && gng.getBoundingClientRect().top>innerHeight*0.9){
+    gng.classList.add('armed');
+    const io4=new IntersectionObserver(es=>{ if(es[0].isIntersecting){ io4.disconnect(); requestAnimationFrame(()=>gng.classList.add('go')); setTimeout(()=>gng.classList.add('go'),50); } },{rootMargin:'0px 0px -15% 0px'});
+    io4.observe(gng);
+    const gchk=()=>{ if(gng.getBoundingClientRect().top<innerHeight*0.85){ gng.classList.add('go'); removeEventListener('scroll',gchk); } };
+    addEventListener('scroll',gchk,{passive:true}); setTimeout(()=>gng.classList.add('go'),8000);
+  }
+  /* subheading underline */
+  const hs=[...document.querySelectorAll('.band .wrap>h3,.head>h3')];
+  const lightUp=()=>{ hs.forEach(h=>{ if(!h.classList.contains('lit') && h.getBoundingClientRect().top<innerHeight*0.9) h.classList.add('lit'); }); };
+  if(reduce) hs.forEach(h=>h.classList.add('lit')); else { lightUp(); addEventListener('scroll',lightUp,{passive:true}); if('IntersectionObserver' in window){ const io5=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('lit'); io5.unobserve(e.target);} }),{rootMargin:'0px 0px -10% 0px'}); hs.forEach(h=>io5.observe(h)); } }
+})();
+</script>
+
+
+</body></html>
