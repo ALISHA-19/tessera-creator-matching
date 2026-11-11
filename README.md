@@ -27,11 +27,13 @@ Creators can't tell which campaigns they can win, and brands can't tell which ap
 
 | | Metric | Today **A** | Target |
 |---|---|---|---|
-| North Star | Completed paid collaborations / month | ~600 | ~645–720 |
+| North Star | Completed paid collaborations / month | ~600 | ~690 |
 | Primary (test) | Filled slots per campaign | 4.0 of ~6 | 4.3–4.8 |
+| Engagement | Weekly active creators | ~40% | 45% |
+| Creator retention | Apply one month and again the next | 48% | 55% |
 | Brand retention | Repeat campaign within 90 days | 35% | 42% |
 
-**The experiment:** an 8-week A/B test, split by **campaign**. Each new campaign is randomly assigned either to the new flow on both sides or to today's flow, and the two groups are compared on filled slots per campaign. I'd roll out if the lift is +0.55 or more (the smallest lift the test can confirm), as long as the guardrails hold.
+**The experiment:** an 8-week A/B test, split by **campaign**. Each new campaign is randomly assigned either to the new flow on both sides or to today's flow, and the two groups are compared on filled slots per campaign. I'd roll out if the lift is +0.55 or more (the smallest lift 8 weeks can confirm), as long as the guardrails hold. A smaller positive lift (+0.3 to +0.55) extends the test to 12 weeks; the site shows every outcome as a decision tree.
 
 ## What's in the case study
 

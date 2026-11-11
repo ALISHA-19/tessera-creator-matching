@@ -1,6 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Tessera Matching Case Study</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
@@ -477,7 +475,7 @@ td.r{white-space:nowrap}
     <div class="facts">
       <div class="fact c-butter"><span class="k">Primary user</span><b>10K–100K</b><span>Micro creators: most of the supply, most hurt by blind applying</span></div>
       <div class="fact c-butter"><span class="k">Primary metric</span><b>4.0 → 4.3–4.8</b><span>filled slots per campaign <span class="A">A</span></span></div>
-      <div class="fact c-butter"><span class="k">v1 effort</span><b>~18 weeks of work</b><span>≈ 6 weeks with 3 engineers <span class="A">A</span></span></div>
+      <div class="fact c-butter"><span class="k">v1 effort</span><b>~18 pw</b><span>≈ 6 weeks with 3 engineers <span class="A">A</span></span></div>
       <div class="fact c-butter"><span class="k">Approach</span><b>Rules, not AI</b><span>enough to test whether fit drives filled slots</span></div>
     </div>
   </div>
@@ -543,7 +541,7 @@ td.r{white-space:nowrap}
           <dt>Who</dt><dd>Brand marketing managers at D2C brands, often a team of one or two</dd>
           <dt>Where</dt><dd>Reviewing applicants → selecting creators</dd>
           <dt>What happens</dt><dd>~70 unranked applicants per campaign <span class="A">A</span>. To judge fit, the manager opens each Instagram profile, looks at their content and asks for audience screenshots. It takes 4–6 hours; median time to a shortlist is 6 days <span class="A">A</span>.</dd>
-          <dt>Why it matters</dt><dd>Revenue is commission on completed work. ~45% of campaigns don't fill every slot within 14 days of closing <span class="A">A</span>, and my guess <span class="A">A</span> is that brands with a slow first campaign rarely run a second.</dd>
+          <dt>Why it matters</dt><dd>Revenue is commission on completed work. ~45% of campaigns don't fill within a week of closing <span class="A">A</span>, and my guess <span class="A">A</span> is that brands with a slow first campaign rarely run a second.</dd>
           <dt>How I'd check it</dt><dd>Launch-to-shortlist time · profile views per applicant · repeat rate for brands whose first campaign under-filled · 6 brand interviews.</dd>
         </dl></div></article>
       <article class="card lift prob rv c-butter"><div class="pn">P3</div><div>
@@ -825,11 +823,10 @@ td.r{white-space:nowrap}
           <thead><tr><th>When</th><th>What happens</th><th>Decision at the end</th></tr></thead>
           <tbody>
             <tr><td><b>Week 1</b></td><td>Real baselines. Tag last quarter's under-filled campaigns by cause. Start Meta app review.</td><td>If budget is the biggest cause, do pricing guidance first</td></tr>
-            <tr><td><b>Week 2</b></td><td>Back-test the score on past campaigns. Test the designs with 5 creators and 3 brands.</td><td>If selected creators don't score clearly higher, drop the number; keep gating and sorting</td></tr>
+            <tr><td><b>Week 2</b></td><td>Back-test the score on past campaigns</td><td>If selected creators don't score clearly higher, drop the number; keep gating and sorting</td></tr>
             <tr><td><b>Weeks 3–8</b></td><td>Build v1 (~18 weeks of work, 3 engineers), weekly demo to Ops</td><td>Ready for a beta</td></tr>
             <tr><td><b>Week 9</b></td><td>Beta with 30 brands</td><td>Fix what breaks</td></tr>
-            <tr><td><b>Weeks 10–17</b></td><td>Campaign-level A/B test: new campaigns are split for 8 weeks (12 if extended)</td><td>Guardrails checked weekly</td></tr>
-            <tr><td><b>~Week 20</b></td><td>Readout, once the last test campaigns are 14 days past closing (~week 24 if extended)</td><td>Roll out, extend, rework or stop</td></tr>
+            <tr><td><b>Weeks 10–17</b></td><td>Campaign-level A/B test, 8 weeks (12 if extended)</td><td>Roll out, extend, rework or stop</td></tr>
           </tbody></table></div></div>
       <div class="card prose rv"><span class="label">One question for each team</span><ul class="clean">
         <li><b>Design:</b> how do we show a "Stretch" match without putting the creator off?</li>
@@ -844,16 +841,16 @@ td.r{white-space:nowrap}
 <section id="s4" class="band dk c-butter">
   <div class="wrap">
     <div class="head"><span class="eyebrow"><i></i>04 · Metrics &amp; experimentation</span><h2>Measure paid work, <span class="serif">not a ratio</span></h2>
-      <p class="lede">Five headline metrics: one North Star, one test metric, one for engagement and two for retention. Only filled slots is read inside the test; the creator metrics are read before vs after rollout, because every creator sees both kinds of campaign. Baselines are my assumptions <span class="A">A</span>; replacing them with real numbers is the first job in week 1.</p></div>
+      <p class="lede">Five headline metrics: one North Star, one test metric, one for engagement and two for retention. Baselines are my assumptions <span class="A">A</span>; replacing them with real numbers is the first job in week 1.</p></div>
 
     <h3 id="s4-mets">Headline metrics</h3>
     <div class="tw minw-900 rv"><table>
       <thead><tr><th>Type</th><th>Metric</th><th class="r">Today <span class="A">A</span></th><th class="r">Target</th><th>When we read it</th></tr></thead>
       <tbody>
-        <tr><td><span class="tag violet">North Star</span></td><td><b>Completed paid collaborations per month</b><br><span class="small">What the marketplace exists to produce, and what commission is earned on. 160 campaigns × 4.0 filled slots = 640 accepted offers; ~40 a month don't end in completed content, which is why it's ~600, not 640.</span></td><td class="r">~600</td><td class="r">~645–720</td><td>Monthly, after rollout</td></tr>
+        <tr><td><span class="tag violet">North Star</span></td><td><b>Completed paid collaborations per month</b><br><span class="small">What the marketplace exists to produce, and what commission is earned on. 160 campaigns × 4.0 filled slots = 640 accepted offers; ~40 a month don't end in completed content, which is why it's ~600, not 640.</span></td><td class="r">~600</td><td class="r">~690</td><td>Monthly, after rollout</td></tr>
         <tr class="win"><td><span class="tag violet">Primary · test</span></td><td><b>Filled slots per campaign</b><br><span class="small">Accepted offers ÷ campaigns, 14 days after close. Moves within a test window and leads straight to the North Star.</span></td><td class="r">4.0 of ~6</td><td class="r">4.3–4.8</td><td>End of the 8-week test</td></tr>
-        <tr><td><span class="tag butter">Engagement</span></td><td><b>Weekly active creators</b><br><span class="small">Share of creators who open their feed at least once a week. Shows whether a feed of campaigns they can win brings them back, even when they apply less.</span></td><td class="r">~40%</td><td class="r">45%</td><td>Weekly, before vs after rollout</td></tr>
-        <tr><td><span class="tag mint">Retention · creator</span></td><td><b>Creator return rate</b><br><span class="small">Creators who apply in one month and again the next. Every creator sees both test and control campaigns, so the test can't split this; I read it before vs after rollout, as directional.</span></td><td class="r">48%</td><td class="r">55%</td><td>Monthly</td></tr>
+        <tr><td><span class="tag butter">Engagement</span></td><td><b>Weekly active creators</b><br><span class="small">Share of creators who open their feed at least once a week. Shows whether a feed of campaigns they can win brings them back, even when they apply less.</span></td><td class="r">~40%</td><td class="r">45%</td><td>Weekly, during the test</td></tr>
+        <tr><td><span class="tag mint">Retention · creator</span></td><td><b>Creator return rate</b><br><span class="small">Creators who apply in one month and again the next. Monthly, so the test gives only two readings; treat it as directional.</span></td><td class="r">48%</td><td class="r">55%</td><td>Monthly</td></tr>
         <tr><td><span class="tag mint">Retention · brand</span></td><td><b>Brand repeat campaign rate</b><br><span class="small">Brands that launch another campaign within 90 days. Where most of the money is.</span></td><td class="r">35%</td><td class="r">42%</td><td>About 3 months after the test</td></tr>
       </tbody></table></div>
     <p class="small muted">Diagnostics I'd watch but not target: win rate per application · days from launch to first shortlist (6 → under 3) · % of applications given a reasoned brand decision before auto-close (80%) · screenshot requests per campaign.</p>
@@ -877,26 +874,15 @@ td.r{white-space:nowrap}
         <li><b>Win concentration:</b> share of wins going to the top 10% of creators rises by no more than 5 points</li></ul>
         <p class="small muted">Also tracked: new creators' share of applications, average fee per deliverable, share of accepted offers that end in completed content.</p></div>
       <div class="card prose rv"><span class="label">Rough sizing <span class="A">A</span></span>
-        <p class="small">Only count slots that would otherwise go unfilled. ~160 campaigns a month × +0.3 to +0.8 filled slots ≈ 50–130 more filled slots, or ~45–120 completed collaborations after the usual drop-off (the North Star target of ~645–720). At ~₹28K actually paid per slot (not budget), that's ≈ ₹13–34L more completed work a month.</p>
-        <p class="small">At 15% commission: <b>≈ ₹2–5L more a month</b> (~₹3.5L at the +0.55 rollout bar). Partly-filled campaigns already earn commission, which is why this is per slot, not per campaign.</p></div>
+        <p class="small">Only count slots that would otherwise go unfilled. ~160 campaigns a month × +0.3 to +0.8 filled slots ≈ 50–130 more paid collaborations. At ~₹28K actually paid per slot (not budget), that's ≈ ₹13–36L more completed work a month.</p>
+        <p class="small">At 15% commission: <b>≈ ₹2–5L more a month</b> (midpoint ~₹4L). Partly-filled campaigns already earn commission, which is why this is per slot, not per campaign.</p></div>
     </div>
 
     <h3 id="s4-ab">The A/B test, randomised by campaign</h3>
 
-    <div class="card prose rv" style="margin-bottom:16px"><span class="label">In plain words: what we're testing</span>
-      <p><b>The question:</b> if creators and brands can both see who fits a campaign, do more creators end up with paid work?</p>
-      <p><b>How:</b> for 8 weeks, every new campaign is randomly put into one of two groups when it launches, like a coin flip.</p>
-      <ul class="clean">
-        <li><b>Test group (the new way):</b> only creators who meet the requirements can apply. Each sees a match score with the reason. The brand gets a ranked list, must decide within 5 days, and can invite strong creators who didn't apply.</li>
-        <li><b>Control group (today's way):</b> the campaign runs exactly as it does now. Anyone can apply, campaigns show newest first, there's no score and no deadline.</li>
-      </ul>
-      <p><b>What we compare:</b> how many of each campaign's slots end up filled by a creator who accepted an offer. <i>Example:</i> Kora Botanics wants 6 creators. Campaigns like it fill about 4 slots today. If test campaigns fill about 4.6 on average and control campaigns about 4.0, the new way gets more creators paid. Across ~160 campaigns in each group, a gap of about half a slot (+0.55) or more is big enough to trust.</p>
-      <p><b>Why split campaigns, not people:</b> a campaign gets the new flow on both sides at once, so the creator applying and the brand choosing see the same thing. If we split creators instead, a brand would see a mix of old and new applicants, and we couldn't tell whether the brand-side changes helped.</p>
-    </div>
-
     <figure class="fig rv" style="margin-bottom:16px">
       <svg viewBox="0 0 1000 480" role="img" aria-label="A/B test as a tree: campaigns split into test and control, measured, then five possible decisions">
-        <rect x="330" y="14" width="340" height="50" rx="25" style="fill:var(--ink)"/><text class="d-t" x="500" y="36" text-anchor="middle" style="fill:var(--paper)">All new campaigns, 8 weeks</text><text class="d-s" x="500" y="54" text-anchor="middle" style="fill:var(--paper);opacity:.8">~320 campaigns, split 50/50 at launch</text><path d="M500 64V88M330 88H670M330 88V108M670 88V108" fill="none" stroke="var(--ink-3)" stroke-width="1.5"/><rect x="170" y="108" width="320" height="74" rx="12" style="fill:var(--mint-soft);stroke:var(--mint);stroke-width:1.5"/><text class="d-l" x="186" y="130">TEST · ~160 CAMPAIGNS</text><text class="d-t" x="186" y="152">Full experience on both sides</text><text class="d-s" x="186" y="170">Gating, ranked lists, deadline, capped invites</text><rect x="510" y="108" width="320" height="74" rx="12" style="fill:var(--surface-2);stroke:var(--line-strong);stroke-width:1.5"/><text class="d-l" x="526" y="130">CONTROL · ~160 CAMPAIGNS</text><text class="d-t" x="526" y="152">Today's flow, unchanged</text><text class="d-s" x="526" y="170">Same weeks, same kinds of brands</text><path d="M330 182V202M670 182V202M330 202H670M500 202V222" fill="none" stroke="var(--ink-3)" stroke-width="1.5"/><rect x="260" y="222" width="480" height="58" rx="12" style="fill:var(--surface-2);stroke:var(--line-strong);stroke-width:1.5"/><text class="d-t" x="500" y="246" text-anchor="middle">Measure filled slots per campaign, 14 days after close</text><text class="d-s" x="500" y="266" text-anchor="middle">Test vs control, at campaign level · guardrails checked every week</text><path d="M500 280V304M105 304H893M105 304V326M302 304V326M499 304V326M696 304V326M893 304V326" fill="none" stroke="var(--ink-3)" stroke-width="1.5"/><rect x="10" y="326" width="190" height="118" rx="12" style="fill:var(--mint-soft);stroke:var(--mint);stroke-width:1.5"/><text class="d-l" x="24" y="348">RESULT</text><text class="d-t" x="24" y="370">+0.55 or more,</text><text class="d-t" x="24" y="388">guardrails fine</text><text class="d-s" x="24" y="412">→ Roll out to everyone</text><rect x="207" y="326" width="190" height="118" rx="12" style="fill:var(--butter-soft);stroke:var(--butter);stroke-width:1.5"/><text class="d-l" x="221" y="348">RESULT</text><text class="d-t" x="221" y="370">Positive, but only</text><text class="d-t" x="221" y="388">+0.3 to +0.55</text><text class="d-s" x="221" y="412">→ Extend to 12 weeks;</text><text class="d-s" x="221" y="429">below +0.45: no clear lift</text><rect x="404" y="326" width="190" height="118" rx="12" style="fill:var(--butter-soft);stroke:var(--butter);stroke-width:1.5"/><text class="d-l" x="418" y="348">RESULT</text><text class="d-t" x="418" y="370">Lift, but offers declined</text><text class="d-t" x="418" y="388">or wins concentrated</text><text class="d-s" x="418" y="412">→ Tighten the invite cap,</text><text class="d-s" x="418" y="429">add availability, retest</text><rect x="601" y="326" width="190" height="118" rx="12" style="fill:var(--butter-soft);stroke:var(--butter);stroke-width:1.5"/><text class="d-l" x="615" y="348">RESULT</text><text class="d-t" x="615" y="370">Lift, but too few</text><text class="d-t" x="615" y="388">applicants per campaign</text><text class="d-s" x="615" y="412">→ Make the block a warning</text><text class="d-s" x="615" y="429">for near-misses, retest</text><rect x="798" y="326" width="190" height="118" rx="12" style="fill:var(--tomato-soft);stroke:var(--tomato);stroke-width:1.5"/><text class="d-l" x="812" y="348">RESULT</text><text class="d-t" x="812" y="370">No lift</text><text class="d-s" x="812" y="412">→ Check the week-1 budget</text><text class="d-s" x="812" y="429">split; reweight or stop</text>
+        <rect x="330" y="14" width="340" height="50" rx="25" style="fill:var(--ink)"/><text class="d-t" x="500" y="36" text-anchor="middle" style="fill:var(--paper)">All new campaigns, 8 weeks</text><text class="d-s" x="500" y="54" text-anchor="middle" style="fill:var(--paper);opacity:.8">~320 campaigns, split 50/50 at launch</text><path d="M500 64V88M330 88H670M330 88V108M670 88V108" fill="none" stroke="var(--ink-3)" stroke-width="1.5"/><rect x="170" y="108" width="320" height="74" rx="12" style="fill:var(--mint-soft);stroke:var(--mint);stroke-width:1.5"/><text class="d-l" x="186" y="130">TEST · ~160 CAMPAIGNS</text><text class="d-t" x="186" y="152">Full experience on both sides</text><text class="d-s" x="186" y="170">Gating, ranked lists, deadline, capped invites</text><rect x="510" y="108" width="320" height="74" rx="12" style="fill:var(--surface-2);stroke:var(--line-strong);stroke-width:1.5"/><text class="d-l" x="526" y="130">CONTROL · ~160 CAMPAIGNS</text><text class="d-t" x="526" y="152">Today's flow, unchanged</text><text class="d-s" x="526" y="170">Same weeks, same kinds of brands</text><path d="M330 182V202M670 182V202M330 202H670M500 202V222" fill="none" stroke="var(--ink-3)" stroke-width="1.5"/><rect x="260" y="222" width="480" height="58" rx="12" style="fill:var(--surface-2);stroke:var(--line-strong);stroke-width:1.5"/><text class="d-t" x="500" y="246" text-anchor="middle">Measure filled slots per campaign, 14 days after close</text><text class="d-s" x="500" y="266" text-anchor="middle">Test vs control, at campaign level · guardrails checked every week</text><path d="M500 280V304M105 304H893M105 304V326M302 304V326M499 304V326M696 304V326M893 304V326" fill="none" stroke="var(--ink-3)" stroke-width="1.5"/><rect x="10" y="326" width="190" height="118" rx="12" style="fill:var(--mint-soft);stroke:var(--mint);stroke-width:1.5"/><text class="d-l" x="24" y="348">RESULT</text><text class="d-t" x="24" y="370">+0.55 or more,</text><text class="d-t" x="24" y="388">guardrails fine</text><text class="d-s" x="24" y="412">→ Roll out to everyone</text><rect x="207" y="326" width="190" height="118" rx="12" style="fill:var(--butter-soft);stroke:var(--butter);stroke-width:1.5"/><text class="d-l" x="221" y="348">RESULT</text><text class="d-t" x="221" y="370">Positive, but only</text><text class="d-t" x="221" y="388">+0.3 to +0.55</text><text class="d-s" x="221" y="412">→ Extend to 12 weeks</text><text class="d-s" x="221" y="429">(~480), then decide</text><rect x="404" y="326" width="190" height="118" rx="12" style="fill:var(--butter-soft);stroke:var(--butter);stroke-width:1.5"/><text class="d-l" x="418" y="348">RESULT</text><text class="d-t" x="418" y="370">Lift, but offers declined</text><text class="d-t" x="418" y="388">or wins concentrated</text><text class="d-s" x="418" y="412">→ Tighten the invite cap,</text><text class="d-s" x="418" y="429">add availability, retest</text><rect x="601" y="326" width="190" height="118" rx="12" style="fill:var(--butter-soft);stroke:var(--butter);stroke-width:1.5"/><text class="d-l" x="615" y="348">RESULT</text><text class="d-t" x="615" y="370">Lift, but too few</text><text class="d-t" x="615" y="388">applicants per campaign</text><text class="d-s" x="615" y="412">→ Make the block a warning</text><text class="d-s" x="615" y="429">for near-misses, retest</text><rect x="798" y="326" width="190" height="118" rx="12" style="fill:var(--tomato-soft);stroke:var(--tomato);stroke-width:1.5"/><text class="d-l" x="812" y="348">RESULT</text><text class="d-t" x="812" y="370">No lift</text><text class="d-s" x="812" y="412">→ Check the week-1 budget</text><text class="d-s" x="812" y="429">split; reweight or stop</text>
         <text class="d-s" x="10" y="472">Green = ship it. Yellow = learn more or adjust, then retest. Red = rethink. Expected lift is +0.3 to +0.8; +0.55 is the smallest lift 8 weeks can confirm.</text>
       </svg>
     </figure>
@@ -906,10 +892,9 @@ td.r{white-space:nowrap}
         <dt>Unit</dt><dd><b>Campaigns</b>, split 50/50 at launch. Test campaigns get the full experience on <b>both</b> sides; control campaigns run as today.</dd>
         <dt>Primary metric</dt><dd>Filled slots per campaign, 14 days after close.</dd>
         <dt>Length &amp; power</dt><dd>8 weeks ≈ 320 campaigns <span class="A">A</span>. With a spread of about 1.8 slots between campaigns <span class="A">A</span>, the smallest lift we can reliably detect is about <b>+0.55</b>. Extending to 12 weeks (~480 campaigns) brings that down to about +0.45.</dd>
-        <dt>If extended</dt><dd>Roll out at +0.45 or more at 12 weeks. Below that, I treat it as no clear lift and go back to the week-1 under-fill split, rather than extending again.</dd>
         <dt>Rollout bar</dt><dd>Expected +0.3 to +0.8. <b>Roll out at +0.55 or more</b>, the smallest lift 8 weeks can confirm.</dd>
         <dt>Bundled</dt><dd>Gating, ranking, deadline and invites ship together, so a win won't say which one mattered. A follow-up creator-feed test would separate ranking from gating.</dd>
-        <dt>Analysis</dt><dd>At campaign level, so repeat applications from the same creator don't inflate the result. Guardrails that involve creators (new creators' share, win concentration) compare applications to test vs control campaigns, clustered by creator.</dd>
+        <dt>Analysis</dt><dd>At campaign level, so repeat applications from the same creator don't inflate the result. Creator-level metrics are clustered by creator.</dd>
         <dt>Spillover</dt><dd>Creators see test and control campaigns in the same feed. I'd check control campaigns' application volume didn't fall.</dd>
       </dl></div>
       
@@ -967,7 +952,7 @@ td.r{white-space:nowrap}
 
     <h3 id="s5-half">If we only had half the engineers</h3>
     <div class="card prose rv hl-card">
-      <span class="label">Half the team (1.5 engineers) for the same 6 weeks ≈ 9 weeks of work. The plan below is 9.5, so the brand's track record moves to the beta week if we run short.</span>
+      <span class="label">Half the team, same 6 weeks ≈ 9.5 weeks of work</span>
       <p><b style="color:#E3A93B">I'd still build the whole loop, just simpler:</b></p>
       <ul class="clean" style="--dot:#6FD3A8">
         <li>Campaign form and creator profile; creators type in their own numbers (3.5 weeks)</li>
@@ -976,12 +961,12 @@ td.r{white-space:nowrap}
         <li>Brands must give a reason and decide by a date (1.5 weeks)</li>
         <li>Invites, with a weekly limit (1 week)</li>
         <li>The brand's track record on campaign cards, so creators can see which brands let applications close without a decision (0.5 week)</li></ul>
-      <p><b style="color:#F28B82">Dropped:</b> the 0–100 score and its breakdown · automatic Instagram checks (Ops checks only creators about to get an offer: ~4 per campaign, ~640 a month at ~7 minutes each, about 75 hours, roughly half an Ops person <span class="A">A</span>) · recent posts on the list.</p>
+      <p><b style="color:#F28B82">Dropped:</b> the 0–100 score and its breakdown · automatic Instagram checks (Ops checks only creators about to get an offer: ~4 per campaign, ~640 a month, about 50 hours <span class="A">A</span>) · recent posts on the list.</p>
       <p class="small"><b>What we lose:</b> brands get less proof, and creators see a label instead of a full explanation. That's fine for a first test, because all we need to learn is whether showing fit fills more slots.</p></div>
   </div>
 </section>
 
-<!-- 7 -->
+<!-- 6 -->
 <section id="s7" class="band dk c-butter">
   <div class="wrap">
     <div class="head"><span class="eyebrow"><i></i>Bonus · Alternative I rejected</span><h2>Ops hand-picks creators for <span class="serif">every campaign</span></h2></div>
@@ -993,7 +978,7 @@ td.r{white-space:nowrap}
   </div>
 </section>
 
-<!-- 8 -->
+<!-- 7 -->
 <section id="s8" class="band c-butter">
   <div class="wrap">
     <div class="head"><span class="eyebrow"><i></i>Appendix · optional</span><h2>The flow, <span class="serif">clickable</span></h2>
@@ -1104,5 +1089,3 @@ td.r{white-space:nowrap}
 })();
 </script>
 
-
-</body></html>
